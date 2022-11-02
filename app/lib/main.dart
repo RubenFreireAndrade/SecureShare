@@ -119,7 +119,7 @@ class _FilesState extends State<Files> {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: snapshot.data!.map((file) { 
+                children: snapshot.data!.map((file) {
                   List<Widget> c = [
                     IconButton(
                       icon: const Icon(Icons.folder),
@@ -131,6 +131,7 @@ class _FilesState extends State<Files> {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayData(file: file),));
                       }
                     ),
+                    Text(file.name),
                   ];
                   if (file.downloaded) {
                     c.add(const Icon(Icons.verified));
