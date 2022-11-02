@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'package:crypto/crypto.dart';
-import 'package:http/http.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 class FileData {
   final String id;
@@ -16,15 +16,15 @@ class FileData {
   late final bool downloaded;
   final bool decrypted;
 
-FileData ({
-  required this.id,
-  required this.name,
-  required this.url,
-  required this.path,
-  required this.type,
-  required this.downloaded,
-  required this.decrypted,
-});
+  FileData ({
+    required this.id,
+    required this.name,
+    required this.url,
+    required this.path,
+    required this.type,
+    required this.downloaded,
+    required this.decrypted,
+  });
   
   factory FileData.fromJson(Map<String, dynamic> json, String appDir) {
     final id = md5.convert(utf8.encode(json['name'] + json['url'])).toString();
@@ -78,9 +78,9 @@ Future <List<FileData>> fetchFiles() async {
   if (response.statusCode == 200) {
     final docDir = await getApplicationDocumentsDirectory();
     final appDir = Directory("${docDir.path}${Platform.pathSeparator}SecureShare");
-      if (!appDir.existsSync()) {
-        appDir.createSync(recursive: true);
-      }
+    if (!appDir.existsSync()) {
+      appDir.createSync(recursive: true);
+    }
 
     List<FileData> list = [];
     jsonDecode(response.body).forEach((v) => list.add(FileData.fromJson(v, appDir.path)));
@@ -104,7 +104,6 @@ class _DisplayDataState extends State<DisplayData> {
   @override
   void initState() {
     super.initState();
-    //futureDownload = downloadFile();
   }
 
   Widget build(BuildContext context) {
@@ -112,29 +111,13 @@ class _DisplayDataState extends State<DisplayData> {
       appBar: AppBar(
         title: const Center(child: Text('Content')),
       ),
-      body: Column(
-        children: [
-          //Text(widget.name),
-          
-        ],
+      body: Center(
+        child: Column(
+          children: [
+            Text(widget.file.name),
+          ],
+        ),
       ),
     );
   }
 }
-
-
-
-// body: Center(
-      //   child: FutureBuilder(
-      //     future: futureDownload,
-      //     builder: (context, snapshot) {
-      //       if (snapshot.hasData) {
-      //         return const Text('test');
-      //       } else if (snapshot.hasError) {
-      //         return Text('${snapshot.error}');
-      //       } else {
-      //         throw Exception('Could not be loaded');
-      //       }
-      //     }
-      //   ),
-      // ),

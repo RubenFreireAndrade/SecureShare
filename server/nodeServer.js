@@ -17,16 +17,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/file', (req, res) => {
   res.send([{
-    name: 'File1',
-    url: '',
-    type: '',
-  },{
-    name: 'File2',
+    name: 'Public',
     url: 'http://localhost:3000/download',
     type: '',
   },{
-    name: 'File3',
-    url: '',
+    name: 'Private',
+    url: 'http://localhost:3000/download',
+    type: '',
+  },{
+    name: 'Shared',
+    url: 'http://localhost:3000/download',
     type: '',
   }]);
 });
