@@ -19,15 +19,15 @@ app.get('/file', (req, res) => {
   res.send([{
     name: 'Public',
     url: 'http://localhost:3000/download',
-    type: '',
+    type: 'text',
   },{
     name: 'Private',
-    url: 'http://localhost:3000/download',
-    type: '',
+    url: 'http://localhost:3000/download1',
+    type: 'image',
   },{
     name: 'Shared',
     url: 'http://localhost:3000/download',
-    type: '',
+    type: 'text',
   }]);
 });
 
@@ -36,6 +36,22 @@ app.get('/user/:name', (req, res) => {
 });
 
 app.get('/download', function(req,res) {
+  res.download(__dirname + '/test.txt', function(err) {
+    if(err) {
+      console.log(err);
+    }
+  });
+});
+
+app.get('/download1', function(req,res) {
+  res.download(__dirname + '/snowmountain.jpg', function(err) {
+    if(err) {
+      console.log(err);
+    }
+  });
+});
+
+app.get('/download2', function(req,res) {
   res.download(__dirname + '/test.txt', function(err) {
     if(err) {
       console.log(err);

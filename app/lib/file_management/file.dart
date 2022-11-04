@@ -13,8 +13,8 @@ class FileData {
   final String url;
   final String path;
   final String type;
-  late final bool downloaded;
-  final bool decrypted;
+  bool downloaded;
+  bool decrypted;
 
   FileData ({
     required this.id,
@@ -71,6 +71,20 @@ class FileData {
       cancelOnError: true,
     );
   }
+
+  Widget getData() {
+    File file = File(path);
+    switch (type) {
+      case 'text':
+        return Text(file.readAsStringSync());
+      
+      case 'image':
+        return Image.file(file);
+        
+      default:
+        throw Exception('unsupported type');
+    }
+  }
 }
 
 Future <List<FileData>> fetchFiles() async {
@@ -99,7 +113,6 @@ class DisplayData extends StatefulWidget {
 }
 
 class _DisplayDataState extends State<DisplayData> {
-  late Future futureDownload;
 
   @override
   void initState() {
@@ -111,12 +124,8 @@ class _DisplayDataState extends State<DisplayData> {
       appBar: AppBar(
         title: const Center(child: Text('Content')),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Text(widget.file.name),
-          ],
-        ),
+      body: Center (
+        child: widget.file.getData(),
       ),
     );
   }

@@ -142,7 +142,7 @@ class _FilesState extends State<Files> {
             } else if (snapshot.hasError) {
               return Text('${snapshot.error}');
             }
-            throw Exception('Not loaded properly');
+            throw Exception('Because it told me to');
           },
         ),
       ),
