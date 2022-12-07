@@ -67,17 +67,23 @@ class HomePage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.green,
               ),
-              child: Center(child: Text('Navigation')),
+              child: Center(
+                child: Text('Navigation', style: TextStyle(fontSize: 20))
+              ),
             ),
             ListTile(
-              title: const Center(child: Text('Chat')),
+              title: const Center(
+                child: Text('Chat', style: TextStyle(fontSize: 20))
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder:(context) => const Chat(),));
               },
             ),
             ListTile(
-              title: const Center(child: Text('Files')),
+              title: const Center(
+                child: Text('Files', style: TextStyle(fontSize: 20))
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder:(context) => const Files(),));

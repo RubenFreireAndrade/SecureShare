@@ -26,7 +26,7 @@ app.get('/file', (req, res) => {
     type: 'image',
   },{
     name: 'Shared',
-    url: 'http://localhost:3000/download',
+    url: 'http://localhost:3000/download2',
     type: 'text',
   }]);
 });
@@ -58,15 +58,6 @@ app.get('/download2', function(req,res) {
     }
   });
 });
-
-// app.get(url, function(req, res) {
-//   const fileStream = fs.createWriteStream('../app/data');
-//   res.pipe(fileStream);
-//   fileStream.on('finish', function() {
-//     fileStream.close();
-//     console.log('Download Complete!');
-//   })
-// })
 
 app.listen(PORT, function () {
   console.log('listening to port');
