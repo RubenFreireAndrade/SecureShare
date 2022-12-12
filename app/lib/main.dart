@@ -105,7 +105,7 @@ class Files extends StatefulWidget {
 }
 
 class _FilesState extends State<Files> {
-  late Future<List<FileData>> futureFiles;
+  late Future<List<FolderData>> futureFiles;
 
   @override
   void initState() {
@@ -118,7 +118,7 @@ class _FilesState extends State<Files> {
         title: const Center(child: Text('Files')),
       ),
       body: Center(
-          child: FutureBuilder<List<FileData>>(
+          child: FutureBuilder<List<FolderData>>(
             future: futureFiles,
             builder: (context, snapshot) {
             if (snapshot.hasData) {

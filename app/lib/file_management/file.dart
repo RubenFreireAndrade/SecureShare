@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FileData {
+class FolderData {
   final String id;
   final String name;
   final String url;
@@ -16,7 +16,7 @@ class FileData {
   bool downloaded;
   bool decrypted;
 
-  FileData ({
+  FolderData ({
     required this.id,
     required this.name,
     required this.url,
@@ -26,12 +26,12 @@ class FileData {
     required this.decrypted,
   });
   
-  factory FileData.fromJson(Map<String, dynamic> json, String appDir) {
+  factory FolderData.fromJson(Map<String, dynamic> json, String appDir) {
     final id = md5.convert(utf8.encode(json['name'] + json['url'])).toString();
     final file = File("$appDir${Platform.pathSeparator}$id");
     final exists = file.existsSync();
 
-    return FileData(
+    return FolderData(
       id: id,
       name: json['name'],
       url: json['url'],
@@ -87,17 +87,18 @@ class FileData {
   }
 }
 
-Future <List<FileData>> fetchFolder() async {
+Future <List<FolderData>> fetchFolder() async {
   final response = await get(Uri.parse('http://localhost:3000/folder'));
   if (response.statusCode == 200) {
     final docDir = await getApplicationDocumentsDirectory();
     final appDir = Directory("${docDir.path}${Platform.pathSeparator}SecureShare");
+    
     if (!appDir.existsSync()) {
       appDir.createSync(recursive: true);
     }
 
-    List<FileData> list = [];
-    jsonDecode(response.body).forEach((v) => list.add(FileData.fromJson(v, appDir.path)));
+    List<FolderData> list = [];
+    jsonDecode(response.body).forEach((v) => list.add(FolderData.fromJson(v, appDir.path)));
     return list;
   } else {
     throw Exception('Failed to load Folders');
@@ -106,7 +107,7 @@ Future <List<FileData>> fetchFolder() async {
 //////////////////////////////////////// Displaying data for Files //////////////////////////////
 
 class DisplayData extends StatefulWidget {
-  final FileData file;
+  final FolderData file;
   const DisplayData({required this.file, super.key,});
   @override
   State<DisplayData> createState() => _DisplayDataState();
