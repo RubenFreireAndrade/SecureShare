@@ -15,7 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/file', (req, res) => {
+app.get('/folder', (req, res) => {
   res.send([{
     name: 'Public',
     url: 'http://localhost:3000/download',

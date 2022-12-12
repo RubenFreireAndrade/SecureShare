@@ -110,7 +110,7 @@ class _FilesState extends State<Files> {
   @override
   void initState() {
     super.initState();
-    futureFiles = fetchFiles();
+    futureFiles = fetchFolder();
   }
   Widget build(BuildContext context) {
     return Scaffold(

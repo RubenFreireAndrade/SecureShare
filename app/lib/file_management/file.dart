@@ -87,8 +87,8 @@ class FileData {
   }
 }
 
-Future <List<FileData>> fetchFiles() async {
-  final response = await get(Uri.parse('http://localhost:3000/file'));
+Future <List<FileData>> fetchFolder() async {
+  final response = await get(Uri.parse('http://localhost:3000/folder'));
   if (response.statusCode == 200) {
     final docDir = await getApplicationDocumentsDirectory();
     final appDir = Directory("${docDir.path}${Platform.pathSeparator}SecureShare");
@@ -100,7 +100,7 @@ Future <List<FileData>> fetchFiles() async {
     jsonDecode(response.body).forEach((v) => list.add(FileData.fromJson(v, appDir.path)));
     return list;
   } else {
-    throw Exception('Failed to load Files');
+    throw Exception('Failed to load Folders');
   }
 }
 //////////////////////////////////////// Displaying data for Files //////////////////////////////
