@@ -45,7 +45,7 @@ class FolderData {
   download() async {
     final request = Request('GET', Uri.parse(url));
     final StreamedResponse response = await Client().send(request);
-    final contentLength = response.contentLength;
+    //final contentLength = response.contentLength;
     
     // _progress = 0;
     // notifyListeners();

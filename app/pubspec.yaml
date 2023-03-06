@@ -39,6 +39,7 @@ dependencies:
   universal_html: ^2.0.8
   crypto: ^3.0.2
   convert: ^3.1.1
+  msix: ^3.8.2
 
 dev_dependencies:
   flutter_test:

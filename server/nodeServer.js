@@ -35,7 +35,7 @@ app.get('/user/:name', (req, res) => {
   res.send('Hello: ' + req.params.name);
 });
 
-app.get('/download', function(req,res) {
+app.get('/download', function(req, res) {
   res.download(__dirname + '/test.txt', function(err) {
     if(err) {
       console.log(err);
@@ -43,7 +43,7 @@ app.get('/download', function(req,res) {
   });
 });
 
-app.get('/download1', function(req,res) {
+app.get('/download1', function(req, res) {
   res.download(__dirname + '/snowmountain.jpg', function(err) {
     if(err) {
       console.log(err);
@@ -51,7 +51,7 @@ app.get('/download1', function(req,res) {
   });
 });
 
-app.get('/download2', function(req,res) {
+app.get('/download2', function(req, res) {
   res.download(__dirname + '/test.txt', function(err) {
     if(err) {
       console.log(err);
