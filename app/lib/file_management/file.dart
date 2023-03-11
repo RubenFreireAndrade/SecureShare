@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FolderData {
+class FileData {
   final String id;
   final String name;
   final String url;
@@ -16,7 +16,7 @@ class FolderData {
   bool downloaded;
   bool decrypted;
 
-  FolderData ({
+  FileData ({
     required this.id,
     required this.name,
     required this.url,
@@ -26,12 +26,12 @@ class FolderData {
     required this.decrypted,
   });
   
-  factory FolderData.fromJson(Map<String, dynamic> json, String appDir) {
+  factory FileData.fromJson(Map<String, dynamic> json, String appDir) {
     final id = md5.convert(utf8.encode(json['name'] + json['url'])).toString();
     final file = File("$appDir${Platform.pathSeparator}$id");
     final exists = file.existsSync();
 
-    return FolderData(
+    return FileData(
       id: id,
       name: json['name'],
       url: json['url'],
@@ -87,8 +87,8 @@ class FolderData {
   }
 }
 
-Future <List<FolderData>> fetchFolder() async {
-  final response = await get(Uri.parse('http://localhost:3000/folder'));
+Future <List<FileData>> fetchFiles() async {
+  final response = await get(Uri.parse('http://localhost:3000/files'));
   if (response.statusCode == 200) {
     final docDir = await getApplicationDocumentsDirectory();
     final appDir = Directory("${docDir.path}${Platform.pathSeparator}SecureShare");
@@ -97,8 +97,8 @@ Future <List<FolderData>> fetchFolder() async {
       appDir.createSync(recursive: true);
     }
 
-    List<FolderData> list = [];
-    jsonDecode(response.body).forEach((v) => list.add(FolderData.fromJson(v, appDir.path)));
+    List<FileData> list = [];
+    jsonDecode(response.body).forEach((v) => list.add(FileData.fromJson(v, appDir.path)));
     return list;
   } else {
     throw Exception('Failed to load Folders');
@@ -107,7 +107,7 @@ Future <List<FolderData>> fetchFolder() async {
 //////////////////////////////////////// Displaying data for Files //////////////////////////////
 
 class DisplayData extends StatefulWidget {
-  final FolderData file;
+  final FileData file;
   const DisplayData({required this.file, super.key,});
   @override
   State<DisplayData> createState() => _DisplayDataState();

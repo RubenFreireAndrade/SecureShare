@@ -15,7 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/folder', (req, res) => {
+app.get('/files', (req, res) => {
   res.send([{
     name: 'Public',
     url: 'http://localhost:3000/download',
@@ -57,6 +57,13 @@ app.get('/download2', function(req, res) {
       console.log(err);
     }
   });
+});
+
+app.get('/register', function(req, res) {
+
+  if(err) {
+    console.log(err);
+  }
 });
 
 app.listen(PORT, function () {

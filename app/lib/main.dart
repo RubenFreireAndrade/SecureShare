@@ -105,12 +105,12 @@ class Files extends StatefulWidget {
 }
 
 class _FilesState extends State<Files> {
-  late Future<List<FolderData>> futureFiles;
+  late Future<List<FileData>> futureFiles;
 
   @override
   void initState() {
     super.initState();
-    futureFiles = fetchFolder();
+    futureFiles = fetchFiles();
   }
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +118,7 @@ class _FilesState extends State<Files> {
         title: const Center(child: Text('Files')),
       ),
       body: Center(
-          child: FutureBuilder<List<FolderData>>(
+          child: FutureBuilder<List<FileData>>(
             future: futureFiles,
             builder: (context, snapshot) {
             if (snapshot.hasData) {

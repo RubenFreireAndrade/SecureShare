@@ -40,6 +40,7 @@ dependencies:
   crypto: ^3.0.2
   convert: ^3.1.1
   msix: ^3.8.2
+  cryptography: ^2.4.0
 
 dev_dependencies:
   flutter_test:
