@@ -60,7 +60,6 @@ app.get('/download2', function(req, res) {
 });
 
 app.get('/register', function(req, res) {
-
   if(err) {
     console.log(err);
   }

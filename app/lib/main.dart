@@ -135,6 +135,7 @@ class _FilesState extends State<Files> {
                           await file.download();
                         }
                         Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayData(file: file),));
+                        file.test();
                       }
                     ),
                     Text(file.name),
@@ -142,7 +143,7 @@ class _FilesState extends State<Files> {
                   if (file.downloaded) {
                     c.add(const Icon(Icons.verified));
                   }
-                  return Column(children: c );
+                  return Column(children: c);
                 }).toList(),
               );
             } else if (snapshot.hasError) {
@@ -157,8 +158,9 @@ class _FilesState extends State<Files> {
 }
 
 class Chat extends StatefulWidget {
-  const Chat({super.key});
+  //final Future<FileData> file;
 
+  const Chat({super.key});
   @override
   State<Chat> createState() => _ChatState();
 }
