@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
-import 'package:cryptography/cryptography.dart';
-import 'package:cryptography/dart.dart';
+// import 'package:cryptography/cryptography.dart';
+// import 'package:cryptography/dart.dart';
 import 'package:http/http.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -74,13 +74,6 @@ class FileData {
     );
   }
 
-  signingIn() async {
-    final request = Request('GET', Uri.parse('http://localhost:3000/register'));
-    final StreamedResponse response = await Client().send(request);
-
-    
-  }
-
   Widget getData() {
     File file = File(path);
     switch (type) {
@@ -140,7 +133,6 @@ class FileData {
 
   // print('Bob private key: $bobPrivateKey');
   // print('Bob pub key: $bobPublicKey');
-  
   // }
 
   // =========================================================================
@@ -170,36 +162,36 @@ class FileData {
 
   // ========================================================================
 
-  Future<void> test() async {
-  // Choose the cipher
-  //final algorithm = AesCtr(macAlgorithm: Hmac.sha256());
-  final algor = AesCtr.with256bits(macAlgorithm: DartHmac.sha256());
+  // Future<void> test() async {
+  // // Choose the cipher
+  // //final algorithm = AesCtr(macAlgorithm: Hmac.sha256());
+  // final algor = AesCtr.with256bits(macAlgorithm: DartHmac.sha256());
 
-  // Generate a random secret key.
-  final secretKey = await algor.newSecretKey();
-  final secretKeyBytes = await secretKey.extractBytes();
-  print('Secret key: ${secretKeyBytes}');
+  // // Generate a random secret key.
+  // final secretKey = await algor.newSecretKey();
+  // final secretKeyBytes = await secretKey.extractBytes();
+  // print('Secret key: ${secretKeyBytes}');
 
-  // Encrypt
-  final secretBox = await algor.encryptString(
-    'Hello!',
-    secretKey: secretKey,
-  );
-  print('Nonce: ${secretBox.nonce}'); // Randomly generated nonce
-  print('Ciphertext: ${secretBox.cipherText}'); // Encrypted message
-  print('MAC: ${secretBox.mac}'); // Message authentication code
+  // // Encrypt
+  // final secretBox = await algor.encryptString(
+  //   'Hello!',
+  //   secretKey: secretKey,
+  // );
+  // print('Nonce: ${secretBox.nonce}'); // Randomly generated nonce
+  // print('Ciphertext: ${secretBox.cipherText}'); // Encrypted message
+  // print('MAC: ${secretBox.mac}'); // Message authentication code
   
-  // If you are sending the secretBox somewhere, you can concatenate all parts of it:
-  final concatenatedBytes = secretBox.concatenation();
-  print('All three parts concatenated: $concatenatedBytes');
+  // // If you are sending the secretBox somewhere, you can concatenate all parts of it:
+  // final concatenatedBytes = secretBox.concatenation();
+  // print('All three parts concatenated: $concatenatedBytes');
 
-  // Decrypt
-  final clearText = await algor.decryptString(
-    secretBox,
-    secretKey: secretKey,
-  );
-  print('Cleartext: $clearText'); // Hello!
-  }
+  // // Decrypt
+  // final clearText = await algor.decryptString(
+  //   secretBox,
+  //   secretKey: secretKey,
+  // );
+  // print('Cleartext: $clearText'); // Hello!
+  // }
 }
 
 Future <List<FileData>> fetchFiles() async {

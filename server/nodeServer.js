@@ -2,11 +2,20 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 };
 
+class User {
+  constructor(name, publicKey){
+    this.name = name;
+    this.publicKey = publicKey;
+  }
+
+  saveUser() {
+    // Save the user to a database?
+  }
+}
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
 
 const PORT = 3000;
 const app = express();
@@ -59,9 +68,17 @@ app.get('/download2', function(req, res) {
   });
 });
 
-app.get('/register', function(req, res) {
-  if(err) {
-    console.log(err);
+app.post('/register', function(req, res) {
+  // Get JSON data?
+  const { userName, publicKey } = req.body;
+
+  if (res.status(200)) {
+    
+    // TODO: Save the user data to a database.
+    // Check if it was a success then return a message back to Client.
+
+    // return JSON ??
+    res.json({ message: "User registered!"})
   }
 });
 
@@ -69,3 +86,21 @@ app.listen(PORT, function () {
   console.log('listening to port');
 });
 
+
+
+
+
+// // Define the endpoint for registering a user
+// app.post('/register', (req, res) => {
+//   // Get the username and public key from the request body
+//   const { userName, publicKey } = req.body;
+
+//   // TODO: Validate the username and public key inputs here
+//   // ...
+
+//   // TODO: Save the user data to a database or other data store here
+//   // ...
+
+//   // Send a success response back to the client
+//   res.status(200).json({ message: 'User registered successfully' });
+// });

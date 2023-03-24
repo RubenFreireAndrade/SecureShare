@@ -14,6 +14,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'chat_management/chat.dart';
 import 'file_management/file.dart';
+import 'file_management/loggingIn.dart';
 
 class MyHttpOverrides extends HttpOverrides{
   @override
@@ -33,19 +34,29 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: HomePage(),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
+
+  final login = LoggingIn();
 
   @override
+  void initState() {
+  }
+
   Widget build(BuildContext context) {
+
+    //login.generateKeys();
+    login.signingIn();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
@@ -135,7 +146,7 @@ class _FilesState extends State<Files> {
                           await file.download();
                         }
                         Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayData(file: file),));
-                        file.test();
+                        //file.test();
                       }
                     ),
                     Text(file.name),
