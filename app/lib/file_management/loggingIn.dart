@@ -16,9 +16,11 @@ import 'package:pointycastle/export.dart';
 import 'package:pointycastle/asymmetric/api.dart';
 import 'package:pointycastle/asymmetric/rsa.dart';
 import 'package:pointycastle/asymmetric/oaep.dart';
+import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:pointycastle/key_generators/api.dart';
 import 'package:pointycastle/key_generators/rsa_key_generator.dart';
 import 'package:pointycastle/random/fortuna_random.dart';
+import 'package:pointycastle/random/auto_seed_block_ctr_random.dart';
 import 'package:pointycastle/src/platform_check/platform_check.dart' as pointy_castle_platform;
 
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed_algor;
@@ -55,12 +57,12 @@ class LoggingIn {
   }
 
   void generateKeysAndStoreToFile() async {
-    // Generate a new key pair
-    //final keyPair = ed_algor.generateKey();
+    //Generate a new key pair
+    final keyPair = ed_algor.generateKey();
 
     // Get the public and private keys as bytes
-    // final publicKeyBytes = keyPair.publicKey.bytes;
-    // final privateKeyBytes = keyPair.privateKey.bytes;
+    final publicKeyBytes = keyPair.publicKey.bytes;
+    final privateKeyBytes = keyPair.privateKey.bytes;
 
     // Store the keys in files
     final publicKeyFile = File('public_key.bin');
@@ -91,68 +93,5 @@ class LoggingIn {
       print('Generated key pair: ${keyPair.publicKey.bytes}');
       print('Generated key pair: ${keyPair.privateKey.bytes}');
     }
-
-    void encryptFile(File input, File output, List<int> key) {
-      final cipher = AESEngine();
-      final params = KeyParameter(Uint8List.fromList(key));
-      final cbc = CBCBlockCipher(cipher)..init(true, params);
-      final padder = PKCS7Padding();
-    }
-
-      // final json = {
-      //   'data': encodedData,
-      //   'signature': encodedSignature,
-      //   'public_key': encodedPublicKey,
-      //   'iv': base64.encode(iv.bytes),
-      //   'key': base64.encode(key.bytes),
-      // };
-
-      // outputFile.writeAsStringSync(jsonEncode(json));
-    
-    // final pair = generateRSAkeyPair(exampleSecureRandom());
-    // final publicModulus = pair.publicKey.modulus;
-    // final publicExponent = pair.publicKey.publicExponent;
-
-    // final privateModulus = pair.privateKey.modulus;
-
-    // print("Private Key Modulus: $privateModulus");
-
-    // var publicKey = RSAPublicKey(BigInt.parse("$publicModulus"), BigInt.parse("$publicExponent"));
-
-    // var data = utf8.encode("Testing encryption");
-
-    // var encryptor = OAEPEncoding(RSAEngine())
-    //   ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
-
-    // var encrypedData = encryptor.process(Uint8List.fromList(data));
-    // print("Encrypted Data: $encrypedData");
-
-    // var encryptedDataString = base64Encode(encrypedData);
-    // print("Encrypted Data String: $encryptedDataString");
   }
 }
-
-
-
-
-
-
-  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAkeyPair(pointy_castle_api.SecureRandom secureRandom, {int bitLength = 2048}) {
-    final keyGen = RSAKeyGenerator();
-
-    keyGen.init(ParametersWithRandom(
-      RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64),
-      secureRandom));
-
-    final pair = keyGen.generateKeyPair();
-
-    final myPublic = pair.publicKey as RSAPublicKey;
-    final myPrivate = pair.privateKey as RSAPrivateKey;
-
-    return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(myPublic, myPrivate);
-  }
-
-  pointy_castle_api.SecureRandom exampleSecureRandom() {
-    final secureRandom = pointy_castle_api.SecureRandom('Fortuna')..seed(KeyParameter(pointy_castle_platform.Platform.instance.platformEntropySource().getBytes(32)));
-    return secureRandom;
-  }
