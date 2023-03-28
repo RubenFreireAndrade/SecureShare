@@ -55,7 +55,8 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     //login.generateKeys();
-    login.signingIn();
+    //login.signingIn();
+    login.generateKeysAndStoreToFile();
 
     return Scaffold(
       appBar: AppBar(
@@ -146,7 +147,6 @@ class _FilesState extends State<Files> {
                           await file.download();
                         }
                         Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayData(file: file),));
-                        //file.test();
                       }
                     ),
                     Text(file.name),
