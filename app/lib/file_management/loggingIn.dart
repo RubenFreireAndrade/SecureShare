@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 import 'dart:typed_data';
-import 'package:pointycastle/api.dart';
+import 'package:pointycastle/api.dart' as pointy_castle_api;
 import 'package:pointycastle/export.dart';
 import 'package:pointycastle/asymmetric/api.dart';
 import 'package:pointycastle/asymmetric/rsa.dart';
@@ -19,7 +19,7 @@ import 'package:pointycastle/asymmetric/oaep.dart';
 import 'package:pointycastle/key_generators/api.dart';
 import 'package:pointycastle/key_generators/rsa_key_generator.dart';
 import 'package:pointycastle/random/fortuna_random.dart';
-import 'package:pointycastle/src/platform_check/platform_check.dart' as pointy_castle;
+import 'package:pointycastle/src/platform_check/platform_check.dart' as pointy_castle_platform;
 
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed_algor;
 
@@ -43,15 +43,15 @@ class LoggingIn {
   }
 
   void signingIn() async {
-    final algoEd = Ed25519();
+    // final algoEd = Ed25519();
 
-    // Alice chooses her key pair
-    final aliceKeyPair = await algoEd.newKeyPair();
-    final alicePrivateKey = await aliceKeyPair.extractPrivateKeyBytes();
-    final alicePublicKey = await aliceKeyPair.extractPublicKey();
+    // // Alice chooses her key pair
+    // final aliceKeyPair = await algoEd.newKeyPair();
+    // final alicePrivateKey = await aliceKeyPair.extractPrivateKeyBytes();
+    // final alicePublicKey = await aliceKeyPair.extractPublicKey();
 
-    print("Alice private key: $alicePrivateKey");
-    print('Alice pub key: $alicePublicKey');
+    // print("Alice private key: $alicePrivateKey");
+    // print('Alice pub key: $alicePublicKey');
   }
 
   void generateKeysAndStoreToFile() async {
@@ -63,36 +63,41 @@ class LoggingIn {
     // final privateKeyBytes = keyPair.privateKey.bytes;
 
     // Store the keys in files
-    //final publicKeyFile = File('public_key.bin');
+    final publicKeyFile = File('public_key.bin');
     //publicKeyFile.writeAsBytesSync(publicKeyBytes);
-    //final privateKeyFile = File('private_key.bin');
+    final privateKeyFile = File('private_key.bin');
     //privateKeyFile.writeAsBytesSync(privateKeyBytes);
 
     // print(publicKeyBytes);
     // print(privateKeyBytes);
 
-    // if (publicKeyFile.existsSync() && privateKeyFile.existsSync()) {
-    //   final publicKeyBytes = publicKeyFile.readAsBytesSync();
-    //   final privateKeyBytes = privateKeyFile.readAsBytesSync();
+    if (publicKeyFile.existsSync() && privateKeyFile.existsSync()) {
+      final publicKeyBytes = publicKeyFile.readAsBytesSync();
+      final privateKeyBytes = privateKeyFile.readAsBytesSync();
 
-    //   final publicKey = ed_algor.PublicKey(publicKeyBytes);
-    //   final privateKey = ed_algor.PrivateKey(privateKeyBytes);
+      final publicKey = ed_algor.PublicKey(publicKeyBytes);
+      final privateKey = ed_algor.PrivateKey(privateKeyBytes);
 
-    //   final keyPair = ed_algor.KeyPair(privateKey, publicKey);
+      final keyPair = ed_algor.KeyPair(privateKey, publicKey);
       
-    //   print('Loaded key pair: ${keyPair.publicKey.bytes}');
-    //   print('Loaded key pair: ${keyPair.privateKey.bytes}');
-    // } else {
-    //   final keyPair = ed_algor.generateKey();
+      print('Loaded key pair: ${keyPair.publicKey.bytes}');
+      print('Loaded key pair: ${keyPair.privateKey.bytes}');
+    } else {
+      final keyPair = ed_algor.generateKey();
 
-    //   publicKeyFile.writeAsBytesSync(keyPair.publicKey.bytes);
-    //   privateKeyFile.writeAsBytesSync(keyPair.privateKey.bytes);
+      publicKeyFile.writeAsBytesSync(keyPair.publicKey.bytes);
+      privateKeyFile.writeAsBytesSync(keyPair.privateKey.bytes);
 
-    //   print('Generated key pair: ${keyPair.publicKey.bytes}');
-    //   print('Generated key pair: ${keyPair.privateKey.bytes}');
-    // }
+      print('Generated key pair: ${keyPair.publicKey.bytes}');
+      print('Generated key pair: ${keyPair.privateKey.bytes}');
+    }
 
-    
+    void encryptFile(File input, File output, List<int> key) {
+      final cipher = AESEngine();
+      final params = KeyParameter(Uint8List.fromList(key));
+      final cbc = CBCBlockCipher(cipher)..init(true, params);
+      final padder = PKCS7Padding();
+    }
 
       // final json = {
       //   'data': encodedData,
@@ -103,34 +108,36 @@ class LoggingIn {
       // };
 
       // outputFile.writeAsStringSync(jsonEncode(json));
+    
+    // final pair = generateRSAkeyPair(exampleSecureRandom());
+    // final publicModulus = pair.publicKey.modulus;
+    // final publicExponent = pair.publicKey.publicExponent;
 
-    final pair = generateRSAkeyPair(exampleSecureRandom());
-    final publicModulus = pair.publicKey.modulus;
-    final publicExponent = pair.publicKey.publicExponent;
+    // final privateModulus = pair.privateKey.modulus;
 
-    final privateModulus = pair.privateKey.modulus; // is the product of privateKey * prime num
-    final privateExponent = pair.privateKey.privateExponent;
-    final privatePublicExponent = pair.privateKey.publicExponent;
+    // print("Private Key Modulus: $privateModulus");
 
-    print("Private Key Modulus: $privateModulus");
-    print("Private Key exponent: $privateExponent");
-    print("Private Key private Public Exponent: $privatePublicExponent");
+    // var publicKey = RSAPublicKey(BigInt.parse("$publicModulus"), BigInt.parse("$publicExponent"));
 
-    var publicKey = RSAPublicKey(BigInt.parse("$publicModulus"), BigInt.parse("$publicExponent"));
+    // var data = utf8.encode("Testing encryption");
 
-    var data = utf8.encode("Testing encryption");
+    // var encryptor = OAEPEncoding(RSAEngine())
+    //   ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
 
-    var encryptor = OAEPEncoding(RSAEngine())
-      ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+    // var encrypedData = encryptor.process(Uint8List.fromList(data));
+    // print("Encrypted Data: $encrypedData");
 
-    var encrypedData = encryptor.process(Uint8List.fromList(data));
-    print("Encrypted Data: $encrypedData");
-
-    var encryptedDataString = base64Encode(encrypedData);
-    print("Encrypted Data String: $encryptedDataString");
+    // var encryptedDataString = base64Encode(encrypedData);
+    // print("Encrypted Data String: $encryptedDataString");
   }
+}
 
-  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAkeyPair(SecureRandom secureRandom, {int bitLength = 2048}) {
+
+
+
+
+
+  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAkeyPair(pointy_castle_api.SecureRandom secureRandom, {int bitLength = 2048}) {
     final keyGen = RSAKeyGenerator();
 
     keyGen.init(ParametersWithRandom(
@@ -145,8 +152,7 @@ class LoggingIn {
     return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(myPublic, myPrivate);
   }
 
-  SecureRandom exampleSecureRandom(){
-    final secureRandom = SecureRandom('Fortuna')..seed(KeyParameter(pointy_castle.Platform.instance.platformEntropySource().getBytes(32)));
+  pointy_castle_api.SecureRandom exampleSecureRandom() {
+    final secureRandom = pointy_castle_api.SecureRandom('Fortuna')..seed(KeyParameter(pointy_castle_platform.Platform.instance.platformEntropySource().getBytes(32)));
     return secureRandom;
   }
-}
