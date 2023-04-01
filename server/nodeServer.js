@@ -1,42 +1,50 @@
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-};
+require('dotenv').config();
+
+const NodeRSA = require('node-rsa');
 
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const redis = require('redis');
-const { promisify } = require('util');
 
 const PORT = 3000;
 const app = express();
 
-app.use(cors());
+app.use(require('cors')());
+
+const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const redisClient = redis.createClient();
-const redisSetAsync = promisify(redisClient.set).bind(redisClient);
+const redis = require('redis');
+const redisClient = redis.createClient({
+  url: `redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
+});
 
-async function saveUserDataToRedis(userName, publicKey) {
-  await redisSetAsync(userName, publicKey);
-}
+redisClient.on('connect',() => {
+  console.log('Connected to redis successfully!');
+})
 
-function validateUserInput(userName, publicKey) {
-  const error = "";
+redisClient.on('error',(error) => {
+  console.log('Redis connection error: ', error);
+})
 
-  if (!userName || userName.trim().length < 3 || userName.trim().length < 20) {
-    error.push("Username must be between 3 and 20 characters long");
+app.post('/register', async (req, res) => {
+  const { username, publicKey } = req.body;
+  await redisClient.set(username, publicKey);
+  res.json({ message: `User ${username} registered successfully` });
+});
+
+app.get('/public-key/:username', async (req, res) => {
+  const { username } = req.params;
+  const publicKeyString = await redisClient.get(username);
+  if (!publicKeyString) {
+    return res.status(404).json({ message: 'User not found' });
   }
+  res.json({
+    username: username,
+    public_key: publicKeyString,
+  });
+});
 
-                              // check comparison with database.
-  if (!publicKey || !/^\-{5}BEGIN PUBLIC KEY\-{5}\n[0-9a-zA-Z\n\/\+\=]+\n\-{5}END PUBLIC KEY\-{5}$/.test(publicKey.trim())) {
-    error.push("Public Key must be a valid RSA Public Key");
-  }
-
-  return error;
-}
-
+//========================================================================
 app.get('/files', (req, res) => {
   res.send([{
     name: 'Public',
@@ -51,10 +59,6 @@ app.get('/files', (req, res) => {
     url: 'http://localhost:3000/download2',
     type: 'text',
   }]);
-});
-
-app.get('/user/:name', (req, res) => {
-  res.send('Hello: ' + req.params.name);
 });
 
 app.get('/download', function(req, res) {
@@ -81,17 +85,7 @@ app.get('/download2', function(req, res) {
   });
 });
 
-app.post('/register', async function(req, res) {
-  const { userName, publicKey } = req.body;
-
-  const error = validateUserInput(userName, publicKey);
-  if (error > 0) return res.status(400).json({ error });
-
-  await saveUserDataToRedis(userName, publicKey);
-
-  res.status(200).json({ message: "User resgistered successfully" });
-});
-
-app.listen(PORT, function () {
-  console.log('listening to port');
+app.listen(PORT, async () => {
+  await redisClient.connect();
+  console.log(`Server is listening on port ${PORT}`);
 });

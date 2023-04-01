@@ -54,9 +54,7 @@ class HomePage extends StatelessWidget {
 
   Widget build(BuildContext context) {
 
-    //login.generateKeys();
-    //login.signingIn();
-    login.generateKeysAndStoreToFile();
+    login.runMain();
 
     return Scaffold(
       appBar: AppBar(

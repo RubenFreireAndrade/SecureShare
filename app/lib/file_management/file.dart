@@ -2,22 +2,13 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
-// import 'package:cryptography/cryptography.dart';
-// import 'package:cryptography/dart.dart';
+
 import 'package:http/http.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart' as pathProvider;
 
-import 'package:pointycastle/api.dart';
-import 'package:pointycastle/asymmetric/api.dart';
-import 'package:pointycastle/asymmetric/rsa.dart';
-import 'package:pointycastle/asymmetric/oaep.dart';
-import 'package:pointycastle/key_generators/api.dart';
-import 'package:pointycastle/key_generators/rsa_key_generator.dart';
-import 'package:pointycastle/random/fortuna_random.dart';
-import 'package:pointycastle/src/platform_check/platform_check.dart' as pointyCastle;
+import 'package:app/utils/file_utils.dart';
 
 class FileData {
   final String id;
@@ -102,12 +93,7 @@ class FileData {
 Future <List<FileData>> fetchFiles() async {
   final response = await get(Uri.parse('http://localhost:3000/files'));
   if (response.statusCode == 200) {
-    final docDir = await pathProvider.getApplicationDocumentsDirectory();
-    final appDir = Directory("${docDir.path}${Platform.pathSeparator}SecureShare");
-    
-    if (!appDir.existsSync()) {
-      appDir.createSync(recursive: true);
-    }
+    final appDir = await FileUtils.getAppDir();
 
     List<FileData> list = [];
     jsonDecode(response.body).forEach((v) => list.add(FileData.fromJson(v, appDir.path)));
