@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:path/path.dart' as path;
+import 'package:app/file_management/file.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart' as path_provider;
 
@@ -15,10 +17,12 @@ import '../utils/key_utils.dart';
 
 class LoggingIn {
   void runMain() async {
-    final keyPair = await KeyUtils.getClientKeys();
-    await KeyUtils.registerNewPublicKey("Rubs", keyPair.publicKey as RSAPublicKey);
-    final receiversPublicKey = await KeyUtils.getReceiversPublicKey("Rubs");
+    //final keyPair = await KeyUtils.getClientKeys();
+    //await KeyUtils.registerNewPublicKey("Rubs", keyPair.publicKey as RSAPublicKey);
+    //final receiversPublicKey = await KeyUtils.getReceiversPublicKey("Rubs");
 
-    print(KeyUtils.publicKeyToJson(receiversPublicKey));
+    uploadFile(path.absolute('..\\server\\test.txt'), "Rubs");
+
+    //print(KeyUtils.publicKeyToJson(receiversPublicKey));
   }
 }
