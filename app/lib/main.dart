@@ -37,8 +37,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HomePage(),
+    return const MaterialApp(
+      home: LoginPage(),
     );
   }
 }
@@ -107,17 +107,58 @@ class HomePage extends StatelessWidget {
 }
 /////////////////////////////////////////// Seperated custom Classes /////////////////////////////////////////////
 
-class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        title: const Text('Login Page'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(200),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please Enter Your Name';
+                  } else {
+                    return null;
+                  }
+                },
+                decoration: const InputDecoration(
+                  labelText: 'User Name'
+                ),
+              ),
+              const SizedBox(height: 25),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                  }
+                }, 
+                child: const Text('Login')
+              )
+            ],
+          )),
+      ),
+    );
   }
 }
 
