@@ -120,20 +120,22 @@ Future <void> uploadFile(String filePath, String userName) async {
   var cipher = EncryptionUtils.createAESCipher(aesKey, iv, true);
 
   // Encrypt the AES key and IV using RSA encryption with the server's public key
-  var rsaCipher = EncryptionUtils.createRSACipher( publicKey, true);
+  var rsaCipher = EncryptionUtils.createRSACipher(publicKey, true);
   var encryptedAesKeyAndIv = rsaCipher.process(Uint8List.fromList([...aesKey, ...iv]));
 
   var request = http.StreamedRequest('POST', Uri.parse('http://localhost:3000/upload'));
   
+  // Add headers for original user | Maybe this is not correct?
+  request.headers['x-user-name'] = userName;
+
   // Add headers for encrypted AES key and IV
-  request.headers['x-aes-key-iv'] =
-      base64Url.encode(encryptedAesKeyAndIv.toList());
+  request.headers['x-aes-key-iv'] = base64Url.encode(encryptedAesKeyAndIv.toList());
 
   // Add headers for original file name and file size
   request.headers['x-file-name'] = basename(filePath);
   request.headers['x-file-size'] = (await file.length()).toString();
 
-  file.openRead().listen((chunk) { 
+  file.openRead().listen((chunk) {
       // Encrypt each chunk of data using AES encryption with a randomly generated key and IV
       var encryptedData = cipher.process(Uint8List.fromList(chunk));
       

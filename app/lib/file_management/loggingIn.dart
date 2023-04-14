@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:path/path.dart' as path;
-import 'package:app/file_management/file.dart';
 import 'package:http/http.dart' as http;
+import 'package:app/file_management/file.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 import 'package:pointycastle/api.dart';
@@ -16,9 +16,9 @@ import '../utils/key_utils.dart';
 
 
 class LoggingIn {
-  void runMain() async {
-    //final keyPair = await KeyUtils.getClientKeys();
-    //await KeyUtils.registerNewPublicKey("Rubs", keyPair.publicKey as RSAPublicKey);
+  void initializeClient() async {
+    final keyPair = await KeyUtils.getClientKeys();
+    await KeyUtils.registerNewPublicKey("Rubs", keyPair.publicKey as RSAPublicKey);
     //final receiversPublicKey = await KeyUtils.getReceiversPublicKey("Rubs");
 
     uploadFile(path.absolute('..\\server\\test.txt'), "Rubs");

@@ -54,6 +54,7 @@ class KeyUtils {
   static Future<AsymmetricKeyPair<PublicKey, PrivateKey>> getClientKeys() async {
     RSAPublicKey publicKey;
     RSAPrivateKey privateKey;
+    
     if ((await FileUtils.fileExists("public_key")) && (await FileUtils.fileExists("private_key"))) {
       final publicKeyJson = await FileUtils.loadFileAsString("public_key");
       final privateKeyJson = await FileUtils.loadFileAsString("private_key");
@@ -78,7 +79,10 @@ class KeyUtils {
 
     final http.Response response = await http.post(
       Uri.parse('http://localhost:3000/register'),
-      body: {'username': username, 'publicKey': publicKeyJson},
+      body: {
+        'username': username, 
+        'publicKey': publicKeyJson
+      },
     );
 
     if (response.statusCode == 200) {

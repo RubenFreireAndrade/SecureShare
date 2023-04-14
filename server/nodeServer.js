@@ -53,6 +53,7 @@ app.get('/public-key/:username', async (req, res) => {
 });
 
 app.post('/upload', async (req, res) => {
+  const xUserName = req.headers['x-user-name'];
   const xAesKeyIv = req.headers['x-aes-key-iv'];
   const xFileName = req.headers['x-file-name'];
   const xFileSize = req.headers['x-file-size'];
@@ -78,7 +79,11 @@ app.post('/upload', async (req, res) => {
   try {
     // Wait for the file to finish uploading
     await new Promise((resolve, reject) => {
-      writeStream.on('finish', resolve);
+      writeStream.on('finish', resolve, async () => {
+        await redisClient.set(xUserName, xFileName, (err) => {
+          err ? console.error(`Error saving user name to Redis`) : console.log(`${xUserName} User saved to Redis for file ${xFileName}`)
+        })
+      });
       writeStream.on('error', reject);
 
       res.status(200).send(`File uploaded to SecureShare.`);
@@ -88,6 +93,12 @@ app.post('/upload', async (req, res) => {
     res.status(500).send('Error uploading file to SecureShare.');
   }
 });
+
+// TODO: Find requested file
+app.get('/find', async (req, res) => {
+
+});
+
 
 //========================================================================
 app.get('/files', (req, res) => {

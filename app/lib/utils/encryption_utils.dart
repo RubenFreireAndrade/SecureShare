@@ -6,14 +6,6 @@ import 'package:pointycastle/pointycastle.dart';
 import 'package:pointycastle/src/platform_check/platform_check.dart';
 
 class EncryptionUtils {
-  static encryptData(PublicKey publicKey) {
-
-  }
-
-  static decryptData(PrivateKey privateKey) {
-    
-  }
-
   static Uint8List generateRandomBytes(int length) {
     var random = SecureRandom('Fortuna')..seed(KeyParameter(
         Platform.instance.platformEntropySource().getBytes(32)));
@@ -32,6 +24,12 @@ class EncryptionUtils {
   static RSAEngine createRSACipher(RSAPublicKey publicKey, bool forEncryption) {
     var cipher = RSAEngine()
       ..init(forEncryption, PublicKeyParameter<RSAPublicKey>(publicKey));
+    return cipher;
+  }
+
+  static RSAEngine decryptRSACipher(RSAPrivateKey privateKey, bool forDecryption) {
+    var cipher = RSAEngine()
+      ..init(forDecryption, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     return cipher;
   }
 }

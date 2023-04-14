@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
 
   Widget build(BuildContext context) {
 
-    login.runMain();
+    login.initializeClient();
 
     return Scaffold(
       appBar: AppBar(
@@ -106,6 +106,20 @@ class HomePage extends StatelessWidget {
   }
 }
 /////////////////////////////////////////// Seperated custom Classes /////////////////////////////////////////////
+
+class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
+
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
 
 class Files extends StatefulWidget {
   const Files({super.key});
