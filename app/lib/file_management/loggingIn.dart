@@ -18,10 +18,10 @@ import '../utils/key_utils.dart';
 class LoggingIn {
   void initializeClient() async {
     final keyPair = await KeyUtils.getClientKeys();
-    await KeyUtils.registerNewPublicKey("Rubs", keyPair.publicKey as RSAPublicKey);
+    //await KeyUtils.registerNewPublicKey("Rubs", keyPair.publicKey as RSAPublicKey);
     //final receiversPublicKey = await KeyUtils.getReceiversPublicKey("Rubs");
 
-    uploadFile(path.absolute('..\\server\\test.txt'), "Rubs");
+    //uploadFile(path.absolute('..\\server\\test2.txt'), "Rubs", "text");
 
     //print(KeyUtils.publicKeyToJson(receiversPublicKey));
   }

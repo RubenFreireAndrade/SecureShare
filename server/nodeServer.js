@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const crypto = require('crypto');
+
 const path = require('path');
 const express = require('express');
 
@@ -56,20 +58,22 @@ app.post('/upload', async (req, res) => {
   const xUserName = req.headers['x-user-name'];
   const xAesKeyIv = req.headers['x-aes-key-iv'];
   const xFileName = req.headers['x-file-name'];
+  const xFileType = req.headers['x-file-type'];
   const xFileSize = req.headers['x-file-size'];
 
-  console.log(xFileName, xFileSize);
+  const fileId = crypto.createHash('md5').update(`${xUserName}:${xFileName}`).digest('hex');
+  const fileData = {
+    name: xFileName,
+    type: xFileType,
+    eKey: xAesKeyIv,
+    size: xFileSize,
+  };
 
   // Create a writeable stream to the GCS file
-  const file = secureBucket.file(xFileName);
+  const file = secureBucket.file(fileId);
   const writeStream = file.createWriteStream({
     metadata: {
       contentType: 'application/octet-stream',
-      metadata: {
-        // Pass the original file name and size as metadata
-        originalFileName: xFileName,
-        originalFileSize: xFileSize,
-      },
     },
   });
   
@@ -79,10 +83,9 @@ app.post('/upload', async (req, res) => {
   try {
     // Wait for the file to finish uploading
     await new Promise((resolve, reject) => {
-      writeStream.on('finish', resolve, async () => {
-        await redisClient.set(xUserName, xFileName, (err) => {
-          err ? console.error(`Error saving user name to Redis`) : console.log(`${xUserName} User saved to Redis for file ${xFileName}`)
-        })
+      writeStream.on('finish', async () => {
+        await redisClient.set(`${xUserName}:file:${fileId}`, JSON.stringify(fileData))
+        resolve()
       });
       writeStream.on('error', reject);
 
@@ -94,28 +97,19 @@ app.post('/upload', async (req, res) => {
   }
 });
 
-// TODO: Find requested file
-app.get('/find', async (req, res) => {
-
+app.get('/files/:username', async (req, res) => {
+  const { username } = req.params;
+  const fileRedisKeys = await redisClient.keys(`${username}:file:*`);
+  const files = [];
+  for (const fileKey of fileRedisKeys) {
+    const fileData = JSON.parse(await redisClient.get(fileKey));
+    fileData.id = fileKey.split(":")[2];
+    files.push(fileData);
+  }
+  res.status(200).send(files);
 });
-
 
 //========================================================================
-app.get('/files', (req, res) => {
-  res.send([{
-    name: 'Public',
-    url: 'http://localhost:3000/download',
-    type: 'text',
-  },{
-    name: 'Private',
-    url: 'http://localhost:3000/download1',
-    type: 'image',
-  },{
-    name: 'Shared',
-    url: 'http://localhost:3000/download2',
-    type: 'text',
-  }]);
-});
 
 app.get('/download', function(req, res) {
   res.download(__dirname + '/test.txt', function(err) {

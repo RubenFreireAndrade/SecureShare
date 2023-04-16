@@ -18,40 +18,42 @@ import '../utils/encryption_utils.dart';
 class FileData {
   final String id;
   final String name;
-  final String url;
-  final String path;
   final String type;
+  final String path;
+  final String eKey;
+  final int size;
   bool downloaded;
   bool decrypted;
 
   FileData ({
     required this.id,
     required this.name,
-    required this.url,
-    required this.path,
     required this.type,
+    required this.path,
+    required this.eKey,
+    required this.size,
     required this.downloaded,
     required this.decrypted,
   });
   
   factory FileData.fromJson(Map<String, dynamic> json, String appDir) {
-    final id = md5.convert(utf8.encode(json['name'] + json['url'])).toString();
-    final file = File("$appDir${Platform.pathSeparator}$id");
+    final file = File("$appDir${Platform.pathSeparator}${json['id']}");
     final exists = file.existsSync();
 
     return FileData(
-      id: id,
+      id: json['id'],
       name: json['name'],
-      url: json['url'],
-      path: file.path,
       type: json['type'],
+      path: file.path,
+      eKey: json['eKey'],
+      size: int.parse(json['size']),
       downloaded: exists,
       decrypted: false,
     );
   }
 
   download() async {
-    final request = http.Request('GET', Uri.parse(url));
+    final request = http.Request('GET', Uri.parse(''));
     final http.StreamedResponse response = await http.Client().send(request);
     //final contentLength = response.contentLength;
     
@@ -96,7 +98,7 @@ class FileData {
 }
 
 Future <List<FileData>> fetchFiles() async {
-  final response = await http.get(Uri.parse('http://localhost:3000/files'));
+  final response = await http.get(Uri.parse('http://localhost:3000/files/Rubs'));
   if (response.statusCode == 200) {
     final appDir = await FileUtils.getAppDir();
 
@@ -108,7 +110,7 @@ Future <List<FileData>> fetchFiles() async {
   }
 }
 
-Future <void> uploadFile(String filePath, String userName) async {
+Future <void> uploadFile(String filePath, String userName, String fileType) async {
   final publicKey = await KeyUtils.getReceiversPublicKey(userName);
   final file = File(filePath);
 
@@ -133,6 +135,7 @@ Future <void> uploadFile(String filePath, String userName) async {
 
   // Add headers for original file name and file size
   request.headers['x-file-name'] = basename(filePath);
+  request.headers['x-file-type'] = fileType;
   request.headers['x-file-size'] = (await file.length()).toString();
 
   file.openRead().listen((chunk) {
