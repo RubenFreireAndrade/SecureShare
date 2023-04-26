@@ -14,14 +14,13 @@ import 'package:pointycastle/key_generators/rsa_key_generator.dart';
 import '../utils/file_utils.dart';
 import '../utils/key_utils.dart';
 
-
-class LoggingIn {
+class LogIn {
   void initializeClient() async {
     final keyPair = await KeyUtils.getClientKeys();
     //await KeyUtils.registerNewPublicKey("Rubs", keyPair.publicKey as RSAPublicKey);
     //final receiversPublicKey = await KeyUtils.getReceiversPublicKey("Rubs");
 
-    //uploadFile(path.absolute('..\\server\\test2.txt'), "Rubs", "text");
+    uploadFile(path.absolute('..\\server\\test2.txt'), "Rubs", "text");
 
     //print(KeyUtils.publicKeyToJson(receiversPublicKey));
   }

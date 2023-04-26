@@ -21,15 +21,15 @@ class EncryptionUtils {
     return cipher;
   }
 
-  static RSAEngine createRSACipher(RSAPublicKey publicKey, bool forEncryption) {
+  static RSAEngine createRSACipher(RSAPublicKey publicKey) {
     var cipher = RSAEngine()
-      ..init(forEncryption, PublicKeyParameter<RSAPublicKey>(publicKey));
+      ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
     return cipher;
   }
 
-  static RSAEngine decryptRSACipher(RSAPrivateKey privateKey, bool forDecryption) {
+  static RSAEngine decryptRSACipher(RSAPrivateKey privateKey) {
     var cipher = RSAEngine()
-      ..init(forDecryption, PrivateKeyParameter<RSAPrivateKey>(privateKey));
+      ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     return cipher;
   }
 }

@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart' as pathProvider;
 
 import 'package:app/utils/file_utils.dart';
+import 'package:pointycastle/pointycastle.dart';
 
 import '../utils/encryption_utils.dart';
 
@@ -53,33 +54,34 @@ class FileData {
   }
 
   download() async {
-    final request = http.Request('GET', Uri.parse(''));
-    final http.StreamedResponse response = await http.Client().send(request);
-    //final contentLength = response.contentLength;
-    
-    // _progress = 0;
-    // notifyListeners();
-  
-    final file = File(path);
+    final request = http.Request('GET', Uri.parse('http://localhost:3000/download'));
 
-    List<int> bytes = [];
-    response.stream.listen(
-      (List<int> newBytes) {
-        bytes.addAll(newBytes);
-        downloaded = true;
-        // _progress = bytes.length / contentLength;
-        // notifyListeners();
-      },
-      onDone: () async {
-        // _progress = 1;
-        // notifyListeners();
-        file.writeAsBytes(bytes);
-      },
-      onError: (e) {
-        print(e);
-      },
-      cancelOnError: true,
-    );
+    request.headers['x-user-name'] = "Rubs";
+    request.headers['x-file-id'] = id;
+
+    final http.StreamedResponse response = await http.Client().send(request);
+
+    final file = await FileUtils.getFile(id);
+    final writeStream = file.openWrite();
+
+    final keyPair = await KeyUtils.getClientKeys();
+
+    // Decrypt the AES key and IV using RSA decryption with the user's private key
+    final rsaCipher = EncryptionUtils.decryptRSACipher(keyPair.privateKey as RSAPrivateKey);
+    final decryptedAesKeyAndIv = rsaCipher.process(base64Url.decode(eKey));
+    final aesKey = decryptedAesKeyAndIv.sublist(0, 256 ~/ 8);
+    final iv = decryptedAesKeyAndIv.sublist(256 ~/ 8);
+
+    // Create AES cipher
+    var cipher = EncryptionUtils.createAESCipher(aesKey, iv, false);
+
+    await for (var chunk in response.stream)
+    {
+      writeStream.add(cipher.process(Uint8List.fromList(chunk)));
+    }
+
+    await writeStream.flush();
+    await writeStream.close();
   }
 
   Widget getData() {
@@ -122,7 +124,7 @@ Future <void> uploadFile(String filePath, String userName, String fileType) asyn
   var cipher = EncryptionUtils.createAESCipher(aesKey, iv, true);
 
   // Encrypt the AES key and IV using RSA encryption with the server's public key
-  var rsaCipher = EncryptionUtils.createRSACipher(publicKey, true);
+  var rsaCipher = EncryptionUtils.createRSACipher(publicKey);
   var encryptedAesKeyAndIv = rsaCipher.process(Uint8List.fromList([...aesKey, ...iv]));
 
   var request = http.StreamedRequest('POST', Uri.parse('http://localhost:3000/upload'));

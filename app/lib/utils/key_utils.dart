@@ -80,7 +80,7 @@ class KeyUtils {
     final http.Response response = await http.post(
       Uri.parse('http://localhost:3000/register'),
       body: {
-        'username': username, 
+        'username': username,
         'publicKey': publicKeyJson
       },
     );

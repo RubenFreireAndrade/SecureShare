@@ -109,30 +109,28 @@ app.get('/files/:username', async (req, res) => {
   res.status(200).send(files);
 });
 
-//========================================================================
+app.get('/download', async function(req, res) {
+  const xUserName = req.headers['x-user-name'];
+  const xFileId = req.headers['x-file-id'];
 
-app.get('/download', function(req, res) {
-  res.download(__dirname + '/test.txt', function(err) {
-    if(err) {
-      console.log(err);
+  try {
+    const fileData = await redisClient.get(`${xUserName}:file:${xFileId}`);
+    if (!fileData) {
+      res.status(404).send("File not found.");
+      return;
     }
-  });
-});
 
-app.get('/download1', function(req, res) {
-  res.download(__dirname + '/snowmountain.jpg', function(err) {
-    if(err) {
-      console.log(err);
-    }
-  });
-});
+    const file = secureBucket.file(xFileId);
+    const readStream = file.createReadStream();
 
-app.get('/download2', function(req, res) {
-  res.download(__dirname + '/test.txt', function(err) {
-    if(err) {
-      console.log(err);
-    }
-  });
+    // Set headers for the response
+    res.setHeader('Content-Type', 'application/octet-stream');
+
+    readStream.pipe(res);
+  } catch (error) {
+    console.error(`Error downloading file from SecureShare: ${error.message}`);
+    res.status(500).send('Error downloading file from SecureShare.');
+  }
 });
 
 app.listen(PORT, async () => {

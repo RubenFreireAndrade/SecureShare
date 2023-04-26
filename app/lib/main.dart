@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatelessWidget {
   HomePage({super.key});
 
-  final login = LoggingIn();
+  final login = LogIn();
 
   @override
   void initState() {
@@ -116,13 +116,19 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
+  final _inputFieldController = TextEditingController();
+
+  void disposeFieldController() {
+    super.dispose();
+    _inputFieldController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: const Text('Login Page'),
+        title: const Text('What Is Your Name?'),
         centerTitle: true,
       ),
       body: Padding(
@@ -134,6 +140,7 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               TextFormField(
+                controller: _inputFieldController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please Enter Your Name';
@@ -142,18 +149,23 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
                 decoration: const InputDecoration(
-                  labelText: 'User Name'
+                  labelText: 'Username',
+                  prefixIcon: Icon(Icons.person),
+                  prefixIconColor: Colors.green,
+                  border: OutlineInputBorder()
                 ),
               ),
               const SizedBox(height: 25),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                    final _userNameValue = _inputFieldController.text;
+                    print(_userNameValue);
+                    // Navigator.pop(context);
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
                   }
                 }, 
-                child: const Text('Login')
+                child: const Text('Check Username')
               )
             ],
           )),
@@ -222,7 +234,6 @@ class _FilesState extends State<Files> {
 }
 
 class Chat extends StatefulWidget {
-  //final Future<FileData> file;
 
   const Chat({super.key});
   @override
