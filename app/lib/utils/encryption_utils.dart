@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:pointycastle/export.dart';
@@ -21,9 +20,15 @@ class EncryptionUtils {
     return cipher;
   }
 
-  static RSAEngine createRSACipher(RSAPublicKey publicKey) {
+  static RSAEngine encryptRSACipherPublic(RSAPublicKey publicKey) {
     var cipher = RSAEngine()
       ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
+    return cipher;
+  }
+
+  static RSAEngine encryptRSACipherPrivate(RSAPrivateKey privateKey) {
+    var cipher = RSAEngine()
+      ..init(true, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     return cipher;
   }
 

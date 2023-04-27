@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const crypto = require('crypto');
+const rsaPemFromModExp = require('rsa-pem-from-mod-exp');
 
 const path = require('path');
 const express = require('express');
@@ -37,36 +38,71 @@ redisClient.on('error',(error) => {
 })
 
 app.post('/register', async (req, res) => {
-  const { username, publicKey } = req.body;
-  await redisClient.set(username, publicKey);
-  res.json({ message: `User ${username} registered successfully` });
+  const { userName, deviceName, publicKey } = req.body;
+  await redisClient.set(`device:${userName}:${deviceName}`, publicKey);
+  res.json({ message: `User ${userName} registered successfully` });
 });
 
-app.get('/public-key/:username', async (req, res) => {
-  const { username } = req.params;
-  const publicKeyString = await redisClient.get(username);
+app.post('/login', async (req, res) => {
+  const { userName, authKey } = req.body;
+  const deviceRedisKeys = await redisClient.keys(`device:${userName}:*`);
+
+  const device = null;
+  const devices = [];
+  for (const deviceKey of deviceRedisKeys) {
+    devices.push(deviceKey.split(":")[2]);
+    const devicePublicKey = JSON.parse(await redisClient.get(deviceKey));
+
+    // Construct the full public key string from the modulus and exponent values
+    const publicKeyString = rsaPemFromModExp(devicePublicKey.modulus, devicePublicKey.exponent);
+
+    // Reconstruct the public key using the modulus and exponent values
+    const reconstructedPublicKey = crypto.createPublicKey(publicKeyString);
+
+    // Convert the base64-encoded encrypted data to a Buffer
+    const encryptedData = Buffer.from(authKey, 'base64url');
+
+    // Decrypt the encrypted data using the public key
+    // const decryptedData = crypto.publicDecrypt({
+    //   key: reconstructedPublicKey,
+    //   padding: crypto.constants.RSA_PKCS1_PADDING,
+    // }, encryptedData);
+
+    // Convert the decrypted data to a string
+    // const decryptedUserName = decryptedData.toString();
+    // console.log(decryptedUserName);
+  }
+
+  res.json({ devices, device: null });
+});
+
+app.get('/:userName/:deviceName', async (req, res) => {
+  const { userName, deviceName } = req.params;
+  const publicKeyString = await redisClient.get(`device:${userName}:${deviceName}`);
   if (!publicKeyString) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json({ message: 'Device not found' });
   }
   res.json({
-    username: username,
+    username: userName,
     public_key: publicKeyString,
   });
 });
 
 app.post('/upload', async (req, res) => {
-  const xUserName = req.headers['x-user-name'];
-  const xAesKeyIv = req.headers['x-aes-key-iv'];
-  const xFileName = req.headers['x-file-name'];
-  const xFileType = req.headers['x-file-type'];
-  const xFileSize = req.headers['x-file-size'];
+  const userName = req.headers['x-user-name'];
+  const deviceName = req.headers['x-device-name'];
+  const eKey = req.headers['x-e-key'];
+  const fileName = req.headers['x-file-name'];
+  const fileType = req.headers['x-file-type'];
+  const fileSize = req.headers['x-file-size'];
 
-  const fileId = crypto.createHash('md5').update(`${xUserName}:${xFileName}`).digest('hex');
+  const fileId = crypto.createHash('md5').update(`${userName}:${fileName}`).digest('hex');
+
   const fileData = {
-    name: xFileName,
-    type: xFileType,
-    eKey: xAesKeyIv,
-    size: xFileSize,
+    name: fileName,
+    type: fileType,
+    eKey: eKey,
+    size: fileSize,
   };
 
   // Create a writeable stream to the GCS file
@@ -84,7 +120,7 @@ app.post('/upload', async (req, res) => {
     // Wait for the file to finish uploading
     await new Promise((resolve, reject) => {
       writeStream.on('finish', async () => {
-        await redisClient.set(`${xUserName}:file:${fileId}`, JSON.stringify(fileData))
+        await redisClient.set(`file:${userName}:${fileId}`, JSON.stringify(fileData))
         resolve()
       });
       writeStream.on('error', reject);
@@ -97,9 +133,10 @@ app.post('/upload', async (req, res) => {
   }
 });
 
-app.get('/files/:username', async (req, res) => {
-  const { username } = req.params;
-  const fileRedisKeys = await redisClient.keys(`${username}:file:*`);
+app.get('/:userName/:deviceName/files', async (req, res) => {
+  const { userName, deviceName } = req.params;
+  const fileRedisKeys = await redisClient.keys(`file:${userName}:*`);
+
   const files = [];
   for (const fileKey of fileRedisKeys) {
     const fileData = JSON.parse(await redisClient.get(fileKey));
@@ -109,18 +146,17 @@ app.get('/files/:username', async (req, res) => {
   res.status(200).send(files);
 });
 
-app.get('/download', async function(req, res) {
-  const xUserName = req.headers['x-user-name'];
-  const xFileId = req.headers['x-file-id'];
+app.get('/:userName/:deviceName/:fileId', async function(req, res) {
+  const { userName, deviceName, fileId } = req.params;
 
   try {
-    const fileData = await redisClient.get(`${xUserName}:file:${xFileId}`);
+    const fileData = await redisClient.get(`file:${userName}:${fileId}`);
     if (!fileData) {
       res.status(404).send("File not found.");
       return;
     }
 
-    const file = secureBucket.file(xFileId);
+    const file = secureBucket.file(fileId);
     const readStream = file.createReadStream();
 
     // Set headers for the response

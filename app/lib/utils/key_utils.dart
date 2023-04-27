@@ -73,27 +73,8 @@ class KeyUtils {
     return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
   }
 
-  // Register with new users public key.
-  static Future<void> registerNewPublicKey(String username, RSAPublicKey publicKey) async {
-    final publicKeyJson = KeyUtils.publicKeyToJson(publicKey);
-
-    final http.Response response = await http.post(
-      Uri.parse('http://localhost:3000/register'),
-      body: {
-        'username': username,
-        'publicKey': publicKeyJson
-      },
-    );
-
-    if (response.statusCode == 200) {
-      print('Public key registered successfully');
-    } else {
-      print('Failed to register public key: ${response.reasonPhrase}');
-    }
-  }
-
-  static Future<RSAPublicKey> getReceiversPublicKey(String userName) async {
-    final publicKeyResponse = await http.get(Uri.parse('http://localhost:3000/public-key/$userName'));
+  static Future<RSAPublicKey> getReceiversPublicKey(String userName, String deviceName) async {
+    final publicKeyResponse = await http.get(Uri.parse('http://localhost:3000/$userName/$deviceName'));
     final publicKeyResponseObj = json.decode(publicKeyResponse.body);
     if (publicKeyResponse.statusCode != 200)
     {
