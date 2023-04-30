@@ -55,9 +55,9 @@ class KeyUtils {
     RSAPublicKey publicKey;
     RSAPrivateKey privateKey;
     
-    if ((await FileUtils.fileExists("public_key")) && (await FileUtils.fileExists("private_key"))) {
-      final publicKeyJson = await FileUtils.loadFileAsString("public_key");
-      final privateKeyJson = await FileUtils.loadFileAsString("private_key");
+    if ((FileUtils.fileExists("public_key")) && (FileUtils.fileExists("private_key"))) {
+      final publicKeyJson = FileUtils.loadFileAsString("public_key");
+      final privateKeyJson = FileUtils.loadFileAsString("private_key");
       
       publicKey = KeyUtils.publicKeyFromJson(publicKeyJson);
       privateKey = KeyUtils.privateKeyFromJson(privateKeyJson);
@@ -66,8 +66,8 @@ class KeyUtils {
       publicKey = keyPair.publicKey as RSAPublicKey;
       privateKey = keyPair.privateKey as RSAPrivateKey;
 
-      await FileUtils.saveToFile("public_key", KeyUtils.publicKeyToJson(publicKey));
-      await FileUtils.saveToFile("private_key", KeyUtils.privateKeyToJson(privateKey));
+      FileUtils.saveToFile("public_key", KeyUtils.publicKeyToJson(publicKey));
+      FileUtils.saveToFile("private_key", KeyUtils.privateKeyToJson(privateKey));
     }
 
     return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);

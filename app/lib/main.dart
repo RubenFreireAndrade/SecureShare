@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 
 import 'pages/login.dart';
 
@@ -16,7 +15,6 @@ class MyHttpOverrides extends HttpOverrides{
 void main() {
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
-  //FlutterDownloader.initialize();
   runApp(const MyApp());
 }
 

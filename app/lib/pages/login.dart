@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/pages/test_page.dart';
 import 'package:app/utils/auth_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:app/entities/user.dart';
@@ -9,6 +10,7 @@ import 'package:app/utils/key_utils.dart';
 import 'package:pointycastle/asymmetric/api.dart';
 
 import 'home.dart';
+import 'register.dart';
 
 // class Login {
 //   void initializeClient() async {
@@ -30,12 +32,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _inputFieldController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+  final inputFieldController = TextEditingController();
 
   void disposeFieldController() {
     super.dispose();
-    _inputFieldController.dispose();
+    inputFieldController.dispose();
   }
 
   @override
@@ -49,13 +51,13 @@ class _LoginPageState extends State<LoginPage> {
       body: Padding(
         padding: const EdgeInsets.all(200),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               TextFormField(
-                controller: _inputFieldController,
+                controller: inputFieldController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please Enter Your Name';
@@ -73,8 +75,8 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 25),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final userNameValue = _inputFieldController.text;
+                  if (formKey.currentState!.validate()) {
+                    final userNameValue = inputFieldController.text;
 
                     KeyUtils.getClientKeys().then((keyPair) {
                       final privateKey = keyPair.privateKey as RSAPrivateKey;
@@ -85,9 +87,11 @@ class _LoginPageState extends State<LoginPage> {
                         print(loginResponse['devices']);
                         if (loginResponse['device'] == null) {
                           // Lead user to Register Page.
-                          // Navigator.pop(context);
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                          print("user dont exist. pushing Register()");
+                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => Register(userName: userNameValue, devices: loginResponse['devices'])));
                         } else {
+                          print("user exists. pushing HomePage()");
                           User.initialize(userNameValue, loginResponse['device']);
                           Navigator.pop(context);
                           Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));

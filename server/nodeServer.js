@@ -83,7 +83,8 @@ app.get('/:userName/:deviceName', async (req, res) => {
     return res.status(404).json({ message: 'Device not found' });
   }
   res.json({
-    username: userName,
+    userName: userName,
+    deviceName: deviceName,
     public_key: publicKeyString,
   });
 });
