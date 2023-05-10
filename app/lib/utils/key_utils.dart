@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:http/http.dart' as http;
 import 'package:pointycastle/pointycastle.dart';
 import 'package:pointycastle/key_generators/rsa_key_generator.dart';
@@ -8,40 +9,40 @@ import 'package:pointycastle/src/platform_check/platform_check.dart';
 import 'file_utils.dart';
 
 class KeyUtils {
-  // Convert an RSA public key to a JSON string
-  static String publicKeyToJson(RSAPublicKey publicKey) {
-    return json.encode({
-      'modulus': publicKey.modulus?.toString(),
-      'exponent': publicKey.exponent?.toString(),
-    });
+  // Convert an RSA public key to a PEM string
+  static String publicKeyToPEM(RSAPublicKey publicKey) {
+    final asn1Sequence = ASN1Sequence()
+      ..add(ASN1Integer(publicKey.modulus))
+      ..add(ASN1Integer(publicKey.exponent));
+
+    final derPublicKey = asn1Sequence.encode();
+
+    return '''-----BEGIN RSA PUBLIC KEY-----\n${const Base64Encoder().convert(derPublicKey)}\n-----END RSA PUBLIC KEY-----''';
   }
 
-  // Serialize a private key to a JSON string
-  static String privateKeyToJson(RSAPrivateKey privateKey) {
-    return json.encode({
-      'modulus': privateKey.modulus?.toString(),
-      'privateExponent': privateKey.privateExponent?.toString(),
-      'p': privateKey.p?.toString(),
-      'q': privateKey.q?.toString(),
-    });
+  // Serialize a private key to a PEM string
+  static String privateKeyToPEM(RSAPrivateKey privateKey) {
+    final privateKeySequence = ASN1Sequence()
+      ..add(ASN1Integer(BigInt.zero))
+      ..add(ASN1Integer(privateKey.modulus))
+      ..add(ASN1Integer(privateKey.publicExponent))
+      ..add(ASN1Integer(privateKey.privateExponent))
+      ..add(ASN1Integer(privateKey.p))
+      ..add(ASN1Integer(privateKey.q));
+
+    final derPrivateKey = privateKeySequence.encode();
+
+    return '''-----BEGIN RSA PRIVATE KEY-----\n${const Base64Encoder().convert(derPrivateKey)}\n-----END RSA PRIVATE KEY-----''';
   }
 
-  // Convert a JSON string to an RSA public key
-  static RSAPublicKey publicKeyFromJson(String jsonString) {
-    final map = json.decode(jsonString);
-    final modulus = BigInt.parse(map['modulus']);
-    final exponent = BigInt.parse(map['exponent']);
-    return RSAPublicKey(modulus, exponent);
+  // Convert a PEM string to an RSA public key
+  static RSAPublicKey publicKeyFromPEM(String pemString) {
+    return encrypt.RSAKeyParser().parse(pemString) as RSAPublicKey;
   }
   
-  // Convert a JSON string to an RSA private key
-  static RSAPrivateKey privateKeyFromJson(String jsonString) {
-    final map = json.decode(jsonString);
-    final modulus = BigInt.parse(map['modulus']);
-    final privateExponent = BigInt.parse(map['privateExponent']);
-    final p = BigInt.parse(map['p']);
-    final q = BigInt.parse(map['q']);
-    return RSAPrivateKey(modulus, privateExponent, p, q);
+  // Convert a PEM string to an RSA private key
+  static RSAPrivateKey privateKeyFromPEM(String pemString) {
+    return encrypt.RSAKeyParser().parse(pemString) as RSAPrivateKey;
   }
 
   static AsymmetricKeyPair<PublicKey, PrivateKey> generateRSAKeys() {
@@ -59,15 +60,15 @@ class KeyUtils {
       final publicKeyJson = FileUtils.loadFileAsString("public_key");
       final privateKeyJson = FileUtils.loadFileAsString("private_key");
       
-      publicKey = KeyUtils.publicKeyFromJson(publicKeyJson);
-      privateKey = KeyUtils.privateKeyFromJson(privateKeyJson);
+      publicKey = KeyUtils.publicKeyFromPEM(publicKeyJson);
+      privateKey = KeyUtils.privateKeyFromPEM(privateKeyJson);
     } else {
       final keyPair = KeyUtils.generateRSAKeys();
       publicKey = keyPair.publicKey as RSAPublicKey;
       privateKey = keyPair.privateKey as RSAPrivateKey;
 
-      FileUtils.saveToFile("public_key", KeyUtils.publicKeyToJson(publicKey));
-      FileUtils.saveToFile("private_key", KeyUtils.privateKeyToJson(privateKey));
+      FileUtils.saveToFile("public_key", KeyUtils.publicKeyToPEM(publicKey));
+      FileUtils.saveToFile("private_key", KeyUtils.privateKeyToPEM(privateKey));
     }
 
     return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(publicKey, privateKey);
@@ -80,6 +81,6 @@ class KeyUtils {
     {
       throw Exception(publicKeyResponseObj["message"] ?? "UNKNOWN ERROR");
     }
-    return KeyUtils.publicKeyFromJson(publicKeyResponseObj["public_key"]);
+    return KeyUtils.publicKeyFromPEM(publicKeyResponseObj["public_key"]);
   }
 }

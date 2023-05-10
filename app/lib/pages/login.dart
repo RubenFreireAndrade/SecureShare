@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:app/pages/test_page.dart';
 import 'package:app/utils/auth_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:app/entities/user.dart';
@@ -78,10 +76,12 @@ class _LoginPageState extends State<LoginPage> {
                   if (formKey.currentState!.validate()) {
                     final userNameValue = inputFieldController.text;
 
-                    KeyUtils.getClientKeys().then((keyPair) {
+                    KeyUtils.getClientKeys().then((keyPair) async {
                       final privateKey = keyPair.privateKey as RSAPrivateKey;
                       final privateRsaCipher = EncryptionUtils.encryptRSACipherPrivate(privateKey);
-                      final authKey = base64Url.encode(privateRsaCipher.process(base64Url.decode(userNameValue)).toList());
+                      final base64UserName = base64Url.decode(userNameValue);
+                      final encryptedUserName = privateRsaCipher.process(base64UserName).toList();
+                      final authKey = base64Url.encode(encryptedUserName);
 
                       AuthUtils.login(userNameValue, authKey).then((loginResponse) {
                         print(loginResponse['devices']);
@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => Register(userName: userNameValue, devices: loginResponse['devices'])));
                         } else {
                           print("user exists. pushing HomePage()");
-                          User.initialize(userNameValue, loginResponse['device']);
+                          User.setUserData(userNameValue, loginResponse['device']);
                           Navigator.pop(context);
                           Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
                         }

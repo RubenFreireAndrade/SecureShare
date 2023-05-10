@@ -1,10 +1,15 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+
+import '../utils/file_utils.dart';
 import 'files.dart';
 import 'chats.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   void initState() {
@@ -23,7 +28,7 @@ class HomePage extends StatelessWidget {
         children: const [
           // TODO = Change this make it appealing.
           Icon(Icons.folder),
-          Icon(Icons.chat)
+          Icon(Icons.chat),
         ],
       ),
       drawer: Drawer(

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'entities/user.dart';
 import 'pages/login.dart';
 
 class MyHttpOverrides extends HttpOverrides{
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
+    User.initialize();
     return const MaterialApp(
       home: LoginPage(),
     );

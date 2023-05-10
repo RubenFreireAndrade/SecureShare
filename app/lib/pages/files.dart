@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:app/utils/file_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as path;
 
 import '../entities/file_data.dart';
 
@@ -26,39 +30,61 @@ class _FilesState extends State<Files> {
         title: const Center(child: Text('Files')),
       ),
       body: Center(
-          child: FutureBuilder<List<FileData>>(
-            future: files,
-            builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: snapshot.data!.map((file) {
-                  List<Widget> c = [
-                    IconButton(
-                      icon: const Icon(Icons.folder),
-                      iconSize: 100,
-                      onPressed: () async {
-                        if (!file.downloaded) {
-                          FileUtils.downloadFile(file);
-                        }
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => FileView(file: file),));
-                      }
-                    ),
-                    Text(file.name),
-                  ];
-                  if (file.downloaded) {
-                    c.add(const Icon(Icons.verified));
+          child: Column( 
+            children: [
+               ElevatedButton(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    allowMultiple: true,
+                    allowedExtensions: ['jpg', 'txt'],
+                    );
+
+                  if (result != null) {
+                    for (String? p in result.paths) {
+                      print(p);
+                      FileUtils.uploadFile(path.absolute(p!), "Rubs", "Windows", "text");
+                    }
+                  } else {
+                    // User canceled the picker
                   }
-                  return Column(children: c);
-                }).toList(),
-              );
-            } else if (snapshot.hasError) {
-              return Text('${snapshot.error}');
-            }
-            throw Exception('Because it told me to');
-          },
-        ),
+                }, 
+                child: const Text('Upload File'),
+              ),
+              FutureBuilder<List<FileData>>(
+                future: files,
+                builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: snapshot.data!.map((file) {
+                      List<Widget> c = [
+                        IconButton(
+                          icon: const Icon(Icons.folder),
+                          iconSize: 100,
+                          onPressed: () async {
+                            if (!file.downloaded) {
+                              FileUtils.downloadFile(file);
+                            }
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => FileView(file: file),));
+                          }
+                        ),
+                        Text(file.name),
+                      ];
+                      if (file.downloaded) {
+                        c.add(const Icon(Icons.verified));
+                      }
+                      return Column(children: c);
+                    }).toList(),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('${snapshot.error}');
+                }
+                throw Exception('Because it told me to');
+              },
+            ),
+            ],
+          )
       ),
     );
   }

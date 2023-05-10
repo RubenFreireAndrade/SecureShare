@@ -95,7 +95,7 @@ class _TestPageState extends State<TestPage> {
                       if (widget.devices.isEmpty) {
                         KeyUtils.getClientKeys().then((keyPair) {
                           AuthUtils.registerNewDevice(widget.userName, deviceNameValue, keyPair.publicKey as RSAPublicKey).then((_) {
-                            User.initialize(widget.userName, deviceNameValue);
+                            User.setUserData(widget.userName, deviceNameValue);
                             Navigator.pop(context);
                             Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
                           });

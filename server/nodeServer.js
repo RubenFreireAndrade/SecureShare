@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const crypto = require('crypto');
+const fs = require('fs');
 const rsaPemFromModExp = require('rsa-pem-from-mod-exp');
 
 const path = require('path');
@@ -47,33 +48,27 @@ app.post('/login', async (req, res) => {
   const { userName, authKey } = req.body;
   const deviceRedisKeys = await redisClient.keys(`device:${userName}:*`);
 
-  const device = null;
+  let device = null;
   const devices = [];
   for (const deviceKey of deviceRedisKeys) {
-    devices.push(deviceKey.split(":")[2]);
-    const devicePublicKey = JSON.parse(await redisClient.get(deviceKey));
-
-    // Construct the full public key string from the modulus and exponent values
-    const publicKeyString = rsaPemFromModExp(devicePublicKey.modulus, devicePublicKey.exponent);
-
-    // Reconstruct the public key using the modulus and exponent values
-    const reconstructedPublicKey = crypto.createPublicKey(publicKeyString);
+    const deviceName = deviceKey.split(":")[2];
+    devices.push(deviceName);
+    const devicePublicKey = await redisClient.get(deviceKey);
 
     // Convert the base64-encoded encrypted data to a Buffer
     const encryptedData = Buffer.from(authKey, 'base64url');
 
     // Decrypt the encrypted data using the public key
-    // const decryptedData = crypto.publicDecrypt({
-    //   key: reconstructedPublicKey,
-    //   padding: crypto.constants.RSA_PKCS1_PADDING,
-    // }, encryptedData);
+    const decryptedData = crypto.publicDecrypt(devicePublicKey, encryptedData);
 
     // Convert the decrypted data to a string
-    // const decryptedUserName = decryptedData.toString();
-    // console.log(decryptedUserName);
+    const decryptedUserName = decryptedData.toString('base64');
+    if (decryptedUserName == userName) {
+      device = deviceName;
+    }
   }
 
-  res.json({ devices, device: null });
+  res.json({ devices, device });
 });
 
 app.get('/:userName/:deviceName', async (req, res) => {

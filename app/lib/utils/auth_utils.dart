@@ -7,14 +7,14 @@ import 'key_utils.dart';
 
 class AuthUtils {
   static Future<void> registerNewDevice(String userName, String deviceName, RSAPublicKey publicKey) async {
-    final publicKeyJson = KeyUtils.publicKeyToJson(publicKey);
+    final publicKeyPEM = KeyUtils.publicKeyToPEM(publicKey);
 
     final http.Response response = await http.post(
       Uri.parse('http://localhost:3000/register'),
       body: {
         'userName': userName,
         'deviceName': deviceName,
-        'publicKey': publicKeyJson
+        'publicKey': publicKeyPEM
       },
     );
 

@@ -75,7 +75,6 @@ class _RegisterPageState extends State<Register> {
                     iconEnabledColor: Colors.green,
                     items: widget.devices.map((dynamic selectedValue) {
                       return DropdownMenuItem<dynamic>(
-                        
                         value: selectedValue,
                         child: Text(selectedValue),
                       );
@@ -104,7 +103,7 @@ class _RegisterPageState extends State<Register> {
                       if (widget.devices.isEmpty) {
                         KeyUtils.getClientKeys().then((keyPair) {
                           AuthUtils.registerNewDevice(widget.userName, deviceNameValue, keyPair.publicKey as RSAPublicKey).then((_) {
-                            User.initialize(widget.userName, deviceNameValue);
+                            User.setUserData(widget.userName, deviceNameValue);
                             Navigator.pop(context);
                             Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
                           });
@@ -112,7 +111,6 @@ class _RegisterPageState extends State<Register> {
                       } else {
                         // Do process for registering new device.
                       }
-
                     }
                   }, 
                   child: const Text('Register User')

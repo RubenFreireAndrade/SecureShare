@@ -98,7 +98,7 @@ class FileUtils {
     await writeStream.close();
   }
 
-  Future <void> uploadFile(String filePath, String userName, String deviceName, String fileType) async {
+  static Future <void> uploadFile(String filePath, String userName, String deviceName, String fileType) async {
     final publicKey = await KeyUtils.getReceiversPublicKey(userName, deviceName);
     final file = File(filePath);
 

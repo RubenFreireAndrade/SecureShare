@@ -20,20 +20,20 @@ class EncryptionUtils {
     return cipher;
   }
 
-  static RSAEngine encryptRSACipherPublic(RSAPublicKey publicKey) {
-    var cipher = RSAEngine()
+  static OAEPEncoding encryptRSACipherPublic(RSAPublicKey publicKey) {
+    var cipher = OAEPEncoding(RSAEngine())
       ..init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
     return cipher;
   }
 
-  static RSAEngine encryptRSACipherPrivate(RSAPrivateKey privateKey) {
-    var cipher = RSAEngine()
+  static PKCS1Encoding encryptRSACipherPrivate(RSAPrivateKey privateKey) {
+    var cipher = PKCS1Encoding(RSAEngine())
       ..init(true, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     return cipher;
   }
 
-  static RSAEngine decryptRSACipher(RSAPrivateKey privateKey) {
-    var cipher = RSAEngine()
+  static OAEPEncoding decryptRSACipher(RSAPrivateKey privateKey) {
+    var cipher = OAEPEncoding(RSAEngine())
       ..init(false, PrivateKeyParameter<RSAPrivateKey>(privateKey));
     return cipher;
   }
