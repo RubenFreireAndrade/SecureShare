@@ -36,13 +36,15 @@ class _FilesState extends State<Files> {
                 onPressed: () async {
                   FilePickerResult? result = await FilePicker.platform.pickFiles(
                     allowMultiple: true,
-                    allowedExtensions: ['jpg', 'txt'],
+                    allowedExtensions: ['png', 'jpg', 'txt'],
                     );
 
                   if (result != null) {
-                    for (String? p in result.paths) {
-                      print(p);
-                      FileUtils.uploadFile(path.absolute(p!), "Rubs", "Windows", "text");
+                    for (PlatformFile f in result.files) {
+                      final deconstructedName = f.name.split('.');
+                      final extension = deconstructedName[deconstructedName.length - 1];
+                      final fileType = ['png', 'jpg'].contains(extension) ? "image" : "text";
+                      FileUtils.uploadFile(path.absolute(f.path!), "Rubs", "Windows", fileType);
                     }
                   } else {
                     // User canceled the picker
@@ -64,7 +66,7 @@ class _FilesState extends State<Files> {
                           iconSize: 100,
                           onPressed: () async {
                             if (!file.downloaded) {
-                              FileUtils.downloadFile(file);
+                              await FileUtils.downloadFile(file);
                             }
                             Navigator.push(context, MaterialPageRoute(builder: (context) => FileView(file: file),));
                           }

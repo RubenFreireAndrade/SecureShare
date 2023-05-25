@@ -70,7 +70,7 @@ class FileUtils {
     }
   }
 
-  static void downloadFile(FileData f) async {
+  static Future<void> downloadFile(FileData f) async {
     final request = http.Request('GET', Uri.parse('http://localhost:3000/${User.name}/${User.device}/${f.id}'));
 
     final http.StreamedResponse response = await http.Client().send(request);
@@ -91,7 +91,17 @@ class FileUtils {
 
     await for (var chunk in response.stream)
     {
+      // for (var i = 0; i < chunk.length; i += 16) {
+      //     final block = chunk.length - i < 16 ? chunk.sublist(i) : chunk.sublist(i, i + 16);
+      //     print(i);
+      //     print(chunk.length);
+      //     print(block.length);
+      //     print("______________");
+      //     writeStream.add(cipher.processBlock(Uint8List.fromList(block)));
+      //   }
+      
       writeStream.add(cipher.process(Uint8List.fromList(chunk)));
+
     }
 
     await writeStream.flush();
@@ -129,10 +139,11 @@ class FileUtils {
 
     file.openRead().listen((chunk) {
         // Encrypt each chunk of data using AES encryption with a randomly generated key and IV
-        var encryptedData = cipher.process(Uint8List.fromList(chunk));
-        
-        // Send the encrypted data and encrypted AES key and IV to the server
-        request.sink.add(encryptedData);
+        for (var i = 0; i < chunk.length; i += 16) {
+          final block = chunk.length - i < 16 ? chunk.sublist(i) : chunk.sublist(i, i + 16);
+          // Send the encrypted data and encrypted AES key and IV to the server
+          request.sink.add(cipher.process(Uint8List.fromList(block)));
+        }
     }, onError: (error) {
         // Handle errors that occur during stream transformation
         print('Error occurred while encrypting chunk: $error');
