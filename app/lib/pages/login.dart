@@ -84,17 +84,26 @@ class _LoginPageState extends State<LoginPage> {
                       final authKey = base64Url.encode(encryptedUserName);
 
                       AuthUtils.login(userNameValue, authKey).then((loginResponse) {
-                        print(loginResponse['devices']);
+                        print('Username: $userNameValue Has: ${loginResponse['devices']}');
                         if (loginResponse['device'] == null) {
                           // Lead user to Register Page.
                           print("user dont exist. pushing Register()");
                           Navigator.pop(context);
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => Register(userName: userNameValue, devices: loginResponse['devices'])));
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => 
+                            Register(
+                              userName: userNameValue,
+                              devices: loginResponse['devices']
+                            )
+                          ));
                         } else {
                           print("user exists. pushing HomePage()");
                           User.setUserData(userNameValue, loginResponse['device']);
                           Navigator.pop(context);
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => 
+                            const HomePage()
+                          ));
                         }
                       });
                     });

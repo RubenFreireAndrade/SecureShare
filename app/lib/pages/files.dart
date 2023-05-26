@@ -78,6 +78,7 @@ class _FilesState extends State<Files> {
                   return Wrap(
                     //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     //crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 50.0,
                     direction: Axis.horizontal,
                     children: snapshot.data!.map((file) {
                       List<Widget> c = [

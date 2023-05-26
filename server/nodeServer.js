@@ -53,6 +53,8 @@ app.post('/login', async (req, res) => {
   for (const deviceKey of deviceRedisKeys) {
     const deviceName = deviceKey.split(":")[2];
     devices.push(deviceName);
+
+    // Grabbing public of deviceKey.
     const devicePublicKey = await redisClient.get(deviceKey);
 
     // Convert the base64-encoded encrypted data to a Buffer

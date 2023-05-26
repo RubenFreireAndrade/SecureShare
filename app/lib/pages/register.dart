@@ -105,7 +105,7 @@ class _RegisterPageState extends State<Register> {
                           AuthUtils.registerNewDevice(widget.userName, deviceNameValue, keyPair.publicKey as RSAPublicKey).then((_) {
                             User.setUserData(widget.userName, deviceNameValue);
                             Navigator.pop(context);
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
                           });
                         });
                       } else {

@@ -71,7 +71,7 @@ class FileUtils {
     }
   }
 
-  static Future<void> downloadFile(FileData f) async {
+  static Future <void> downloadFile(FileData f) async {
     final request = http.Request('GET', Uri.parse('http://localhost:3000/${User.name}/${User.device}/${f.id}'));
 
     final http.StreamedResponse response = await http.Client().send(request);

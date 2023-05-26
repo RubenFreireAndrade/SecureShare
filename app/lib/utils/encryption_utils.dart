@@ -38,8 +38,7 @@ class EncryptionUtils {
     return cipher;
   }
 
-  static Uint8List padData(Uint8List data, int blockSize)
-  {
+  static Uint8List padData(Uint8List data, int blockSize) {
     final padLength = blockSize - (data.length % blockSize);
     final padded = Uint8List(data.length + padLength)..setAll(0, data);
     PKCS7Padding().addPadding(padded, data.length);
