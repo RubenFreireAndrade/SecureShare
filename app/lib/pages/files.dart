@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app/entities/user.dart';
 import 'package:app/utils/file_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -7,6 +8,7 @@ import 'package:path/path.dart' as path;
 
 import '../entities/file_data.dart';
 
+import '../utils/key_utils.dart';
 import 'file_view.dart';
 
 class Files extends StatefulWidget {
@@ -18,6 +20,7 @@ class Files extends StatefulWidget {
 
 class _FilesState extends State<Files> {
   late Future<List<FileData>> files;
+  final receiverFieldController = TextEditingController();
 
   @override
   void initState() {
@@ -30,8 +33,20 @@ class _FilesState extends State<Files> {
         title: const Center(child: Text('Files')),
       ),
       body: Center(
-          child: Column( 
+          child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 400, right: 400),
+                child: TextFormField(
+                  controller: receiverFieldController,
+                  decoration: const InputDecoration(
+                    labelText: 'Receiver',
+                    prefixIcon: Icon(Icons.devices_sharp),
+                    prefixIconColor: Colors.green,
+                    border: OutlineInputBorder()
+                  ),
+                ),
+              ),
                ElevatedButton(
                 onPressed: () async {
                   FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -40,11 +55,15 @@ class _FilesState extends State<Files> {
                     );
 
                   if (result != null) {
+                    var receiver = receiverFieldController.text;
+                    if (receiver == null || receiver.isEmpty) {
+                      receiver = User.name;
+                    }
                     for (PlatformFile f in result.files) {
                       final deconstructedName = f.name.split('.');
                       final extension = deconstructedName[deconstructedName.length - 1];
                       final fileType = ['png', 'jpg'].contains(extension) ? "image" : "text";
-                      FileUtils.uploadFile(path.absolute(f.path!), "Rubs", "Windows", fileType);
+                      await FileUtils.uploadFile(path.absolute(f.path!), receiver, "Windows", fileType);
                     }
                   } else {
                     // User canceled the picker
@@ -56,9 +75,10 @@ class _FilesState extends State<Files> {
                 future: files,
                 builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  return Wrap(
+                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    //crossAxisAlignment: CrossAxisAlignment.center,
+                    direction: Axis.horizontal,
                     children: snapshot.data!.map((file) {
                       List<Widget> c = [
                         IconButton(

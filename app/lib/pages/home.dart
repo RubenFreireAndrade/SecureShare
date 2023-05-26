@@ -27,8 +27,7 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: const [
           // TODO = Change this make it appealing.
-          Icon(Icons.folder),
-          Icon(Icons.chat),
+          Text('Welcome To Home Page!', style: TextStyle(fontSize: 30),)
         ],
       ),
       drawer: Drawer(

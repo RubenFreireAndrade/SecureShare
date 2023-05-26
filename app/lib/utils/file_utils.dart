@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:path/path.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:pointycastle/pointycastle.dart';
 
 import '../entities/file_data.dart';
@@ -88,20 +89,41 @@ class FileUtils {
 
     // Create AES cipher
     var cipher = EncryptionUtils.createAESCipher(aesKey, iv, false);
-
+    
+    final paddedFileSize = f.size + (128 - (f.size % 128)) % 128;
+    print(paddedFileSize);
+    print(f.size);
+    var decryptedFileSize = 0;
+    var chunkCarryOver = Uint8List(0);
     await for (var chunk in response.stream)
     {
-      // for (var i = 0; i < chunk.length; i += 16) {
-      //     final block = chunk.length - i < 16 ? chunk.sublist(i) : chunk.sublist(i, i + 16);
-      //     print(i);
-      //     print(chunk.length);
-      //     print(block.length);
-      //     print("______________");
-      //     writeStream.add(cipher.processBlock(Uint8List.fromList(block)));
-      //   }
-      
-      writeStream.add(cipher.process(Uint8List.fromList(chunk)));
+      // Combining carry-over of bytes of previous chunk with new chunk bytes.
+      final bytesBuilder = BytesBuilder();
+      bytesBuilder.add(chunkCarryOver);
+      bytesBuilder.add(Uint8List.fromList(chunk)); 
 
+      // Together with carry-over bytes, if new chunk is not perfectly divisible by 128 then getting maximum bytes divisible and carry-over the rest.
+      var encryptedChunk = bytesBuilder.toBytes();
+      final encryptedChunkRemainder = encryptedChunk.length % (cipher.blockSize * 8);
+      if (encryptedChunkRemainder > 0) {
+        chunkCarryOver = encryptedChunk.sublist(encryptedChunk.length - encryptedChunkRemainder);
+        encryptedChunk = encryptedChunk.sublist(0, encryptedChunk.length - encryptedChunkRemainder);
+      }
+
+      // Decrypt a divisible block of bytes.
+      var decryptedChunk = Uint8List(encryptedChunk.length);
+      var offset = 0;
+      while (offset < encryptedChunk.length) {
+        offset += cipher.processBlock(encryptedChunk, offset, decryptedChunk, offset);
+      }
+      assert(offset == encryptedChunk.length);
+
+      // On very last chunk remove padding.
+      decryptedFileSize += decryptedChunk.length;
+      if (paddedFileSize - decryptedFileSize == 0) {
+        decryptedChunk = EncryptionUtils.unpadData(decryptedChunk, paddedFileSize - f.size);
+      }
+      writeStream.add(decryptedChunk);
     }
 
     await writeStream.flush();
@@ -136,16 +158,26 @@ class FileUtils {
     request.headers['x-file-name'] = basename(filePath);
     request.headers['x-file-type'] = fileType;
     request.headers['x-file-size'] = (await file.length()).toString();
-
+    
     file.openRead().listen((chunk) {
-        // Encrypt each chunk of data using AES encryption with a randomly generated key and IV
-        for (var i = 0; i < chunk.length; i += 16) {
-          final block = chunk.length - i < 16 ? chunk.sublist(i) : chunk.sublist(i, i + 16);
-          // Send the encrypted data and encrypted AES key and IV to the server
-          request.sink.add(cipher.process(Uint8List.fromList(block)));
+        // If new chunk is not perfectly divisible by 128 then padding remaining bytes.
+        var plainTextChunk = Uint8List.fromList(chunk);
+        final plainTextChunkRemainder = plainTextChunk.length % (cipher.blockSize * 8);
+        if (plainTextChunkRemainder > 0) {
+          print(plainTextChunk.length);
+          plainTextChunk = EncryptionUtils.padData(plainTextChunk, cipher.blockSize * 8);
         }
+
+        // Encrypt a divisible block of bytes.
+        final encryptedChunk = Uint8List(plainTextChunk.length);
+        var offset = 0;
+        while (offset < plainTextChunk.length) {
+          offset += cipher.processBlock(plainTextChunk, offset, encryptedChunk, offset);
+        }
+        assert(offset == plainTextChunk.length);
+
+        request.sink.add(encryptedChunk);
     }, onError: (error) {
-        // Handle errors that occur during stream transformation
         print('Error occurred while encrypting chunk: $error');
         request.sink.addError(error);
     }, onDone: () {
