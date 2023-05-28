@@ -1,8 +1,6 @@
 require('dotenv').config();
 
 const crypto = require('crypto');
-const fs = require('fs');
-const rsaPemFromModExp = require('rsa-pem-from-mod-exp');
 
 const path = require('path');
 const express = require('express');

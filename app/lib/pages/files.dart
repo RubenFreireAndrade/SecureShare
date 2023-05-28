@@ -36,7 +36,7 @@ class _FilesState extends State<Files> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 400, right: 400),
+                padding: const EdgeInsets.only(left: 400, right: 400, top: 10, bottom: 5),
                 child: TextFormField(
                   controller: receiverFieldController,
                   decoration: const InputDecoration(

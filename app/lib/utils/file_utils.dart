@@ -100,7 +100,7 @@ class FileUtils {
       // Combining carry-over of bytes of previous chunk with new chunk bytes.
       final bytesBuilder = BytesBuilder();
       bytesBuilder.add(chunkCarryOver);
-      bytesBuilder.add(Uint8List.fromList(chunk)); 
+      bytesBuilder.add(Uint8List.fromList(chunk));
 
       // Together with carry-over bytes, if new chunk is not perfectly divisible by 128 then getting maximum bytes divisible and carry-over the rest.
       var encryptedChunk = bytesBuilder.toBytes();
@@ -120,6 +120,8 @@ class FileUtils {
 
       // On very last chunk remove padding.
       decryptedFileSize += decryptedChunk.length;
+      // FOr demo
+      print(decryptedFileSize);
       if (paddedFileSize - decryptedFileSize == 0) {
         decryptedChunk = EncryptionUtils.unpadData(decryptedChunk, paddedFileSize - f.size);
       }
